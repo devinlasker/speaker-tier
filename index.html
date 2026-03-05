@@ -695,7 +695,7 @@ Search the web for current information on:
 - Their social media following on EACH platform separately: Instagram, X/Twitter, TikTok, Facebook, Threads, LinkedIn
   Report each platform's follower count individually in the dataPoints fields (instagram, twitter, tiktok, facebook, threads, linkedin).
   Set to 0 if they don't have that platform. We will calculate the total and score automatically — do NOT score socialMedia yourself, set it to 0.
-- Their typical speaking/appearance fee or booking difficulty in the market
+- Their speaking fee — search "[name] speaking fee" and "[name] keynote fee" on speaker bureau sites. Report the fee range you find in estimatedFee.
 - Major awards, nominations, or NYT/WSJ bestseller list status
 - Their career achievements, legacy, and cultural impact
 - Their Google Trends search interest score (search "Google Trends [name]" to find relative interest)
@@ -741,11 +741,16 @@ IMPORTANT: Meeting the HIGH bar in Signal C alone = minimum score of 2, regardle
 CRITERION 2 — SOCIAL MEDIA FOLLOWING:
 DO NOT SCORE THIS. Set socialMedia to 0. Report raw follower counts per platform in dataPoints (instagram, twitter, tiktok, facebook, threads, linkedin). We calculate this score automatically.
 
-CRITERION 3 — APPEARANCE FEE / BOOKING DIFFICULTY:
+CRITERION 3 — OPEN MARKET APPEARANCE FEE:
+Search "[name] speaking fee", "[name] keynote fee", "[name] appearance fee" on speaker bureau sites (AllAmericanSpeakers, BigSpeak, KeynoteSpeakers, etc.) and news articles.
+IMPORTANT: Use the TOP of any reported range. If you find a range like $100K–$200K, score it as $200K (score 2).
+IMPORTANT: If no fee data is found for a nationally known figure, DO NOT score 0. Infer from comparable peers.
+  Adam Grant, Brene Brown, Malcolm Gladwell, Simon Sinek = $100K–$200K range = score 2
+  Kevin Hart, Matthew McConaughey, Oprah = $500K+ = score 3
 0 = Under $50K market rate
 1 = $50K–$150K market rate
-2 = $150K–$500K market rate, OR required significant relationship capital to book at any price
-3 = $500K+ market rate, OR essentially unbookable without extraordinary personal access (e.g. Obama, Oprah, Arnold Schwarzenegger, Sylvester Stallone, Bill Gates, Dalai Lama)
+2 = $150K–$500K market rate
+3 = $500K+ market rate, OR essentially unbookable without extraordinary personal access
 
 CRITERION 4 — ACCOLADES & RECOGNITION (major awards + NYT/WSJ bestseller):
 0 = No major awards or bestseller status
