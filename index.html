@@ -1,32 +1,1251 @@
-Speaker Tier Tool — Tech Stack & Maintenance Guide
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speaker Tier Classifier</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c26;
+    --border: #2a2a38;
+    --text: #e8e8f0;
+    --muted: #6b6b85;
+    --tier0: #f0c040;
+    --tier1: #60a5fa;
+    --tier2: #a78bfa;
+    --tier3: #6b6b85;
+    --accent: #f0c040;
+  }
 
-What It Is
-A single HTML file hosted on GitHub Pages. There is no backend server, no database, and no framework. To update anything, you edit one file on GitHub.
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-Tech Stack
-GitHub Pages — hosts the tool
-• URL — https://devinlasker.github.io/speaker-tier/
-• File — index.html in the main branch of github.com/devinlasker/speaker-tier
-• To update — Open index.html in GitHub, click the pencil icon, edit, commit. Changes go live in ~2 minutes.
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-Cloudflare Worker — secure API proxy
-• Name — speaker-rankings-tool
-• URL — https://speaker-rankings-tool.dlasker.workers.dev
-• Purpose — Sits between the tool and the Anthropic API so the API key is never exposed in the browser
-• To update the API key — Cloudflare dashboard → Workers & Pages → speaker-rankings-tool → Settings → Variables and Secrets → edit ANTHROPIC_API_KEY
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(240,192,64,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(240,192,64,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-Anthropic API — powers the AI scoring
-• Console — console.anthropic.com
-• Model — Claude Sonnet — uses web search to research each speaker in real time
-• Cost — Approximately $0.10–0.15 per speaker scored, billed pay-as-you-go
-• To rotate the key — Create a new key in the Anthropic console, update it in Cloudflare, delete the old one
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 24px;
+    position: relative;
+    z-index: 1;
+  }
 
-Wikipedia API & Google Trends — free data sources
-• Wikipedia — Called directly from the browser, no key required. Pulls 5 years of page view data.
-• Google Trends — Called directly from the browser, no key required. Pulls relative search interest (0–100).
+  header { margin-bottom: 56px; }
 
-If Something Breaks
-• Tool won't load — Check GitHub Pages is still enabled: github.com/devinlasker/speaker-tier → Settings → Pages
-• Scoring fails with a network error — Check the Cloudflare Worker is active: dash.cloudflare.com → Workers & Pages → speaker-rankings-tool
-• API key error — The Anthropic API key may be expired or over budget. Log into console.anthropic.com to check, then update the key in Cloudflare.
-• Score seems wrong — The scoring rules live inside index.html in the AI prompt section. Search for 'CRITERION' to find and edit them.
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  .data-sources {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .source-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .source-tag.live {
+    border-color: rgba(74,222,128,0.3);
+    color: #4ade80;
+    background: rgba(74,222,128,0.06);
+  }
+
+  .tier-legend {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .tier-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    border: 1px solid;
+  }
+
+  .tier-badge.t0 { border-color: var(--tier0); color: var(--tier0); background: rgba(240,192,64,0.06); }
+  .tier-badge.t1 { border-color: var(--tier1); color: var(--tier1); background: rgba(96,165,250,0.06); }
+  .tier-badge.t2 { border-color: var(--tier2); color: var(--tier2); background: rgba(167,139,250,0.06); }
+  .tier-badge.t3 { border-color: var(--tier3); color: var(--tier3); background: rgba(107,107,133,0.06); }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .search-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 40px;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .search-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+
+  .btn {
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #f5d060; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .batch-hint {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .batch-hint span { color: var(--accent); cursor: pointer; text-decoration: underline; }
+
+  .loading-bar {
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 16px;
+    overflow: hidden;
+    display: none;
+  }
+  .loading-bar.active { display: block; }
+
+  .loading-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #60a5fa);
+    border-radius: 2px;
+    animation: loading 1.5s ease-in-out infinite;
+    width: 40%;
+  }
+
+  @keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  .status-steps {
+    margin-top: 14px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .status-steps.active { display: flex; }
+
+  .status-step {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s;
+  }
+  .status-step.done { color: #4ade80; }
+  .status-step.active-step { color: var(--accent); }
+  .step-icon { width: 14px; text-align: center; }
+
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .results-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .results-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  .speaker-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 16px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .speaker-card.tier-0 { border-left: 3px solid var(--tier0); }
+  .speaker-card.tier-1 { border-left: 3px solid var(--tier1); }
+  .speaker-card.tier-2 { border-left: 3px solid var(--tier2); }
+  .speaker-card.tier-3 { border-left: 3px solid var(--tier3); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+
+  .speaker-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .tier-pill {
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tier-pill.t0 { background: rgba(240,192,64,0.15); color: var(--tier0); border: 1px solid rgba(240,192,64,0.3); }
+  .tier-pill.t1 { background: rgba(96,165,250,0.15); color: var(--tier1); border: 1px solid rgba(96,165,250,0.3); }
+  .tier-pill.t2 { background: rgba(167,139,250,0.15); color: var(--tier2); border: 1px solid rgba(167,139,250,0.3); }
+  .tier-pill.t3 { background: rgba(107,107,133,0.15); color: var(--tier3); border: 1px solid rgba(107,107,133,0.3); }
+
+  .live-data-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .live-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.2);
+    color: #4ade80;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .live-chip .live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .scores-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 600px) { .scores-grid { grid-template-columns: 1fr; } }
+
+  .score-row { display: flex; flex-direction: column; gap: 6px; }
+
+  .score-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .score-label .val { color: var(--text); font-weight: 500; }
+  .live-indicator { font-size: 9px; color: #4ade80; margin-left: 4px; }
+
+  .score-track {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .score-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  .total-score {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+
+  .total-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .total-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .commission {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    background: var(--surface);
+  }
+
+  .reasoning {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    margin-bottom: 12px;
+  }
+
+  .wiki-data {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .wiki-stat { display: flex; flex-direction: column; gap: 2px; }
+  .wiki-stat .wlabel { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .wiki-stat .wval { color: var(--text); font-size: 13px; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 500px;
+    width: 100%;
+  }
+
+  .modal h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .modal p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .modal textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    resize: vertical;
+    min-height: 200px;
+    outline: none;
+    margin-bottom: 16px;
+  }
+  .modal textarea:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
+
+  .error-card {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 13px;
+    color: #fca5a5;
+    margin-bottom: 16px;
+  }
+
+  .progress-info {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+    display: none;
+  }
+  .progress-info.active { display: block; }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  .bubble-flag {
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #fbbf24;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+
+  .override-flag {
+    background: rgba(240,192,64,0.08);
+    border: 1px solid rgba(240,192,64,0.4);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--tier0);
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+
+  .complexity-row { margin: 12px 0; padding: 14px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; }
+  .complexity-label { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); }
+  .complexity-hint { font-size: 11px; color: var(--muted); font-style: italic; }
+  .complexity-selector { display: flex; gap: 8px; }
+  .cx-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; cursor: pointer; transition: all 0.15s ease; color: var(--muted); }
+  .cx-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .cx-btn.cx-active { background: rgba(99,179,237,0.12); border-color: rgba(99,179,237,0.4); color: #63B3ED; }
+  .cx-score { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 700; line-height: 1; }
+  .cx-desc { font-size: 10px; text-align: center; line-height: 1.3; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="eyebrow">Commission Intelligence</div>
+    <h1>Speaker <span>Tier</span><br>Classifier</h1>
+    <p class="subtitle">AI-powered scoring using live data sources to determine commission tier for any speaker booking.</p>
+    <div class="data-sources">
+      <div class="source-tag live">● Wikipedia API</div>
+      <div class="source-tag live">● Google Trends</div>
+      <div class="source-tag live">● Web Search</div>
+      <div class="source-tag">AI Analysis</div>
+    </div>
+  </header>
+
+  <div class="tier-legend">
+    <div class="tier-badge t0"><div class="dot"></div> Tier 0 — $10,000 &nbsp;·&nbsp; 12–14 pts</div>
+    <div class="tier-badge t1"><div class="dot"></div> Tier 1 — $5,000 &nbsp;·&nbsp; 9–11 pts</div>
+    <div class="tier-badge t2"><div class="dot"></div> Tier 2 — $2,500 &nbsp;·&nbsp; 5–8 pts</div>
+    <div class="tier-badge t3"><div class="dot"></div> Tier 3 — No Commission &nbsp;·&nbsp; 1–4 pts</div>
+  </div>
+
+  <div class="search-section">
+    <div class="search-row">
+      <input type="text" class="search-input" id="nameInput" placeholder="Enter speaker name (e.g. Malcolm Gladwell)" />
+      <button class="btn btn-primary" id="scoreBtn" onclick="scoreSingle()">Score</button>
+    </div>
+    <div class="batch-hint">
+      Want to score multiple speakers? <span onclick="openBatch()">Run batch mode →</span>
+    </div>
+    <div class="loading-bar" id="loadingBar">
+      <div class="loading-fill"></div>
+    </div>
+    <div class="status-steps" id="statusSteps">
+      <div class="status-step" id="step1"><span class="step-icon">○</span> Fetching Wikipedia + Google Trends data...</div>
+      <div class="status-step" id="step2"><span class="step-icon">○</span> Running web search for public profile & credentials...</div>
+      <div class="status-step" id="step3"><span class="step-icon">○</span> Analyzing scores & generating tier...</div>
+    </div>
+    <div class="progress-info" id="progressInfo"></div>
+  </div>
+
+  <div id="resultsArea">
+    <div class="empty-state">
+      <div class="icon">◈</div>
+      <p>Enter a speaker name above to generate<br>a live data-backed tier assessment.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="batchModal">
+  <div class="modal">
+    <h3>Batch Score Speakers</h3>
+    <p>Enter one speaker name per line. Each speaker will be scored using live Wikipedia and web search data.</p>
+    <textarea id="batchInput" placeholder="Kevin Hart&#10;Malcolm Gladwell&#10;Brené Brown&#10;Simon Sinek"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeBatch()">Cancel</button>
+      <button class="btn btn-primary" onclick="runBatch()">Run Batch</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Backend Worker URL — update this if you ever recreate the Worker
+const WORKER_URL = 'https://speaker-rankings-tool.dlasker.workers.dev';
+// ============================================================
+
+let results = [];
+let isRunning = false;
+
+async function fetchWikipediaPageViews(title) {
+  const encodedTitle = encodeURIComponent(title.replace(/ /g, '_'));
+  const today = new Date();
+  const end = today.toISOString().slice(0,10).replace(/-/g,'');
+  const start5yr = new Date(today.getFullYear() - 5, today.getMonth(), 1).toISOString().slice(0,10).replace(/-/g,'');
+  const viewsUrl = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${encodedTitle}/monthly/${start5yr}/${end}`;
+  try {
+    const viewsRes = await fetch(viewsUrl);
+    if (!viewsRes.ok) return null;
+    const viewsData = await viewsRes.json();
+    const items = viewsData.items || [];
+    if (!items.length) return null;
+    const byYear = {};
+    for (const item of items) {
+      const year = item.timestamp.slice(0, 4);
+      byYear[year] = (byYear[year] || 0) + item.views;
+    }
+    const annualViews = Object.entries(byYear)
+      .sort((a, b) => b[0] - a[0])
+      .slice(0, 5)
+      .map(([year, views]) => ({ year, views }));
+    const totalAll = items.reduce((sum, i) => sum + i.views, 0);
+    const avgMonthly = items.length > 0 ? Math.round(totalAll / items.length) : 0;
+    return { annualViews, avgMonthly };
+  } catch(e) { return null; }
+}
+
+async function fetchWikipediaData(name) {
+  try {
+    // Strategy 1: Search API — try top 3 results
+    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name)}&format=json&origin=*&srlimit=3`;
+    const searchRes = await fetch(searchUrl);
+    const searchData = await searchRes.json();
+    const candidates = searchData.query?.search || [];
+
+    for (const candidate of candidates) {
+      const views = await fetchWikipediaPageViews(candidate.title);
+      if (views) return { title: candidate.title, ...views, hasPage: true };
+    }
+
+    // Strategy 2: Direct URL — construct from name
+    const directTitle = name.trim().replace(/\s+/g, '_');
+    const directViews = await fetchWikipediaPageViews(directTitle);
+    if (directViews) return { title: name.trim(), ...directViews, hasPage: true };
+
+    // Strategy 3: Strip common prefixes (President, Dr., Sir, Judge, etc.)
+    const stripped = name.replace(/^(President|Dr\.|Sir|Judge|His Holiness the|The)\s+/i, '').trim();
+    if (stripped !== name) {
+      const strippedViews = await fetchWikipediaPageViews(stripped.replace(/\s+/g, '_'));
+      if (strippedViews) return { title: stripped, ...strippedViews, hasPage: true };
+    }
+
+    // Found in search but no view data
+    if (candidates.length > 0) return { title: candidates[0].title, annualViews: null, hasPage: true };
+    return null;
+  } catch(e) {
+    return null;
+  }
+}
+
+async function researchWithWebSearch(name, wikiData, trendsData) {
+  const annualSummary = wikiData?.annualViews?.map(y => `${y.year}: ${y.views.toLocaleString()}`).join(', ') || 'unavailable';
+  const wikiContext = wikiData
+    ? `Wikipedia page found: "${wikiData.title}". Annual page views over last 5 years — ${annualSummary}.`
+    : `No Wikipedia page found for this person.`;
+  const trendsContext = trendsData
+    ? `Google Trends data available for scoring (relative search interest 0-100 scale, US, last 5 years). Use web search to find their current Google Trends interest score.`
+    : `Google Trends data unavailable — rely on web search for search interest signals.`;
+
+  const prompt = `You are a professional speaker booking analyst. Research this public figure and score them on our commission rubric.
+
+SPEAKER: "${name}"
+
+LIVE DATA GATHERED:
+${wikiContext}
+${trendsContext}
+
+Search the web for current information on:
+- Their social media following on EACH platform separately: Instagram, X/Twitter, TikTok, Facebook, Threads, LinkedIn
+  Report each platform's follower count individually in the dataPoints fields (instagram, twitter, tiktok, facebook, threads, linkedin).
+  Set to 0 if they don't have that platform. We will calculate the total and score automatically — do NOT score socialMedia yourself, set it to 0.
+- Their speaking fee — search "[name] speaking fee" and "[name] keynote fee" on speaker bureau sites. Report the fee range you find in estimatedFee.
+- Major awards, nominations, or NYT/WSJ bestseller list status
+- Their career achievements, legacy, and cultural impact
+- Their Google Trends search interest score (search "Google Trends [name]" to find relative interest)
+
+For MAINSTREAM CULTURAL FOOTPRINT — search specifically based on their category:
+- TV/NEWS: Show name, network (ABC/NBC/CBS/CNN/Fox/Bravo/etc.), seasons, ratings, streaming platform (Netflix/Hulu/HBO/Amazon)
+- FILM: Box office gross (search Box Office Mojo), number of major releases, franchise involvement (Marvel, DC, etc.)
+- COMEDY: Netflix/Hulu/HBO/Amazon specials, arena or theater tour gross (search Pollstar), number of specials
+- SPORTS: Career stats, championships, Hall of Fame status (search Basketball-Reference, Pro-Football-Reference, or equivalent), Olympic medals
+- PODCAST: Apple Podcasts or Spotify ranking, estimated monthly listeners, number of episodes, years running
+- MUSIC: Billboard chart performance, Grammy nominations/wins, concert tour gross (search Pollstar/Billboard Boxscore), streaming numbers
+- POLITICS/PUBLIC OFFICE: Office held, election results, historical significance, major legislation or rulings
+- BUSINESS/ENTREPRENEURSHIP: Company valuation, revenue, Forbes ranking, industry disruption
+
+SCORING RUBRIC — score each 0, 1, 2, or 3:
+
+CRITERION 1 — PUBLIC PROFILE
+This score is a composite of THREE signals — weight all equally:
+  A) Wikipedia annual views: Under 120K=low, 120K–1.2M=moderate, 1.2M–6M=high, 6M+=iconic
+  B) Google Trends interest (0–100): Under 20=low, 20–50=moderate, 50–75=high, 75+=iconic
+  C) MAINSTREAM CULTURAL FOOTPRINT — industry-agnostic, scored by scale not medium:
+       LOW = No meaningful public presence outside their niche
+       MODERATE = Regional/industry recognition; minor TV credits, small podcast, local sports
+       HIGH = National mainstream visibility — pick whichever applies:
+         • TV/Streaming: Hit network/cable show, recurring national news role, Netflix/Hulu/HBO series
+         • Film: Multiple major theatrical releases, $50M+ box office, franchise role
+         • Comedy: Netflix/Hulu/HBO/Amazon special, theater or arena touring
+         • Sports: Professional career with championships, Hall of Fame, Olympic medals
+         • Podcast: Top 100 Apple/Spotify ranking, 500K+ monthly listeners
+         • Music: Billboard Top 40, Grammy nominated, major tour grossing $10M+
+         • Politics: Elected federal/state office, Supreme Court, major public role
+         • Business: Forbes-ranked, $1B+ company, nationally covered disruption
+       ICONIC = Defines their category at a generational level — Super Bowl, Oscar franchise,
+                sold-out stadiums, #1 podcast, defining political figure, etc.
+
+Score based on the OVERALL PICTURE across all three signals. Do NOT let one weak signal override two strong ones.
+IMPORTANT: Meeting the HIGH bar in Signal C alone = minimum score of 2, regardless of Wikipedia or Trends numbers.
+0 = Obscure outside their niche — low across all three signals
+1 = Known within an industry or region — moderate in at least one signal
+2 = Nationally recognized — high in at least two signals, or iconic in Signal C
+3 = Global/generational cultural figure — iconic across all three signals
+
+CRITERION 2 — SOCIAL MEDIA FOLLOWING:
+DO NOT SCORE THIS. Set socialMedia to 0. Report raw follower counts per platform in dataPoints (instagram, twitter, tiktok, facebook, threads, linkedin). We calculate this score automatically.
+
+CRITERION 3 — OPEN MARKET APPEARANCE FEE:
+Search "[name] speaking fee", "[name] keynote fee", "[name] appearance fee" on speaker bureau sites (AllAmericanSpeakers, BigSpeak, KeynoteSpeakers, etc.) and news articles.
+IMPORTANT: Use the TOP of any reported range. If you find a range like $100K–$200K, score it as $200K (score 2).
+IMPORTANT: If no fee data is found for a nationally known figure, DO NOT score 0. Infer from comparable peers.
+  Adam Grant, Brene Brown, Malcolm Gladwell, Simon Sinek = $100K–$200K range = score 2
+  Kevin Hart, Matthew McConaughey, Oprah = $500K+ = score 3
+0 = Under $50K market rate
+1 = $50K–$150K market rate
+2 = $150K–$500K market rate
+3 = $500K+ market rate, OR essentially unbookable without extraordinary personal access
+
+CRITERION 4 — ACCOLADES & RECOGNITION (major awards + NYT/WSJ bestseller):
+0 = No major awards or bestseller status
+1 = Notable industry awards or peer recognition
+2 = Major award winner or nominee (Oscar, Grammy, Emmy, Tony, Hall of Fame, Olympic medal, Nobel, etc.) OR NYT/WSJ bestseller
+3 = Both major awards AND bestseller, OR multiple major awards across categories
+
+
+TIER THRESHOLDS (AI scores 4 criteria, max 12 pts; Booking Complexity 0-2 added manually by user, total max 14):
+11–12 base = Tier 0 | 8–10 base = Tier 1 | 4–7 base = Tier 2 | 1–3 = Tier 3
+
+TIER 0 OVERRIDE: Figures of unique historic, cultural, or spiritual significance (e.g. a sitting/former world leader,
+Nobel Peace Prize laureate, Dalai Lama, Pope) may qualify for Tier 0 regardless of social media score.
+Flag these cases explicitly so the team can discuss.
+
+TIER 0 OVERRIDE — set tier0Override: true if the speaker holds or held ANY of:
+- Sitting or former Pope, US President, Dalai Lama, UN Secretary-General
+- Head of state of a G7 nation, Nobel Peace Prize laureate, Archbishop of Canterbury
+If any apply, set tier0Override: true. Do not second-guess this list.
+
+CRITERION 4 — ACCOLADES:
+DO NOT SCORE. Set accolades to 0. Report these facts in dataPoints:
+  hasAwardWin: true/false (Grammy/Emmy/Oscar/Tony/HOF/Olympic medal/Nobel/Peabody win)
+  hasAwardNomination: true/false (nominated but not won)
+  hasNationalBestseller: true/false (NYT/WSJ/USA Today/Publishers Weekly or described as "national bestselling")
+  hasForbesList: true/false (Forbes/Time/Billboard major list)
+  hasTED: true/false (TED main stage)
+  hasMajorPublisher: true/false (Penguin/HarperCollins/Simon & Schuster/Random House/Hachette/Macmillan)
+  hasMultipleMajorAwards: true/false (won 3+ major championships, titles, or awards in their field — e.g. multiple Olympic gold medals, multiple Grand Slams, multiple Masters titles, multiple Super Bowl MVPs, multiple Oscars, etc.)
+
+APPEARANCE FEE RULE: Use the TOP of any reported range to determine score. Never default to 0 for a well-known figure with no fee data — infer from peers.
+PUBLIC PROFILE RULE: HIGH in Signal C alone = minimum score of 2. Missing Wikipedia/Trends data never justifies low score for globally recognized figures. National morning show co-host/anchor = minimum score of 2.
+
+Respond ONLY with valid JSON — no markdown, no extra text:
+{
+  "name": "Full Name",
+  "scores": {
+    "publicProfile": 0,
+    "socialMedia": 0,
+    "appearanceFee": 0,
+    "accolades": 0
+  },
+  "dataPoints": {
+    "wikiTitle": "",
+    "instagram": 0, "twitter": 0, "tiktok": 0, "facebook": 0, "threads": 0, "linkedin": 0,
+    "estimatedSocialFollowing": "",
+    "estimatedFee": "",
+    "notableAwards": "",
+    "hasAwardWin": false,
+    "hasAwardNomination": false,
+    "hasNationalBestseller": false,
+    "hasForbesList": false,
+    "hasTED": false,
+    "hasMajorPublisher": false,
+    "hasMultipleMajorAwards": false
+  },
+  "total": 0,
+  "tier": 0,
+  "commission": "$X,XXX or No Commission",
+  "bubbleReview": false,
+  "bubbleNote": "",
+  "tier0Override": false,
+  "tier0OverrideNote": "",
+  "tier0Override": false,
+  "tier0OverrideNote": "",
+  "reasoning": "2-3 sentences citing specific facts from your searches."
+}`;
+
+  let response;
+  try {
+    response = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 4 }],
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+  } catch(fetchErr) {
+    throw new Error('Network error — please check your connection and try again.');
+  }
+
+  if (response.status === 429) {
+    throw new Error('Rate limit reached — please wait 30 seconds and try again.');
+  }
+  if (!response.ok) {
+    const errText = await response.text().catch(() => '');
+    throw new Error(`API error ${response.status}: ${errText.slice(0,200)}`);
+  }
+
+  const data = await response.json();
+  const textBlocks = data.content.filter(b => b.type === "text").map(b => b.text).join("");
+  const jsonMatch = textBlocks.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error("Could not parse AI response");
+  const result = JSON.parse(jsonMatch[0]);
+
+  // Inject live wiki data
+  if (wikiData?.annualViews) {
+    result.dataPoints = result.dataPoints || {};
+    result.dataPoints.annualViews = wikiData.annualViews;
+    result.dataPoints.wikiTitle = wikiData.title;
+    result.liveWiki = true;
+  }
+
+  // Inject live trends data
+  if (trendsData?.averageInterest !== null && trendsData?.averageInterest !== undefined) {
+    result.dataPoints = result.dataPoints || {};
+    result.dataPoints.trendsAvg = trendsData.averageInterest;
+    result.dataPoints.trendsPeak = trendsData.peakInterest;
+    result.liveTrends = true;
+  }
+
+  // Compute social media score from raw platform numbers (math only, no AI judgment)
+  const dp = result.dataPoints || {};
+  const totalFollowers = (dp.instagram||0)+(dp.twitter||0)+(dp.tiktok||0)+(dp.facebook||0)+(dp.threads||0)+(dp.linkedin||0);
+  if (totalFollowers >= 5000000) result.scores.socialMedia = 3;
+  else if (totalFollowers >= 1000000) result.scores.socialMedia = 2;
+  else if (totalFollowers >= 100000) result.scores.socialMedia = 1;
+  else result.scores.socialMedia = 0;
+  result.dataPoints.totalSocialFollowers = totalFollowers;
+  result.dataPoints.estimatedSocialFollowing = totalFollowers > 0
+    ? totalFollowers >= 1000000
+      ? (totalFollowers/1000000).toFixed(1)+'M combined'
+      : Math.round(totalFollowers/1000)+'K combined'
+    : result.dataPoints.estimatedSocialFollowing || 'unavailable';
+
+  // Compute accolades score from boolean facts (math only, no AI judgment)
+  const awardWin = dp.hasAwardWin == true;
+  const awardNom = dp.hasAwardNomination == true;
+  const bestseller = dp.hasNationalBestseller == true;
+  const forbesList = dp.hasForbesList == true;
+  const ted = dp.hasTED == true;
+  const majorPub = dp.hasMajorPublisher == true;
+  const multipleAwards = dp.hasMultipleMajorAwards == true;
+  const hasAny = awardNom || forbesList || ted || majorPub;
+  if ((awardWin && bestseller) || (awardWin && multipleAwards) || multipleAwards) result.scores.accolades = 3;
+  else if (awardWin || bestseller) result.scores.accolades = 2;
+  else if (hasAny) result.scores.accolades = 1;
+  else result.scores.accolades = 0;
+
+  // Apply Tier 0 Override — lock scores for heads of state
+  if (result.tier0Override) {
+    result.scores.publicProfile = 3;
+    result.scores.appearanceFee = 3;
+    result.scores.accolades = 3;
+    result.total = 12;
+    result.tier = 0;
+  } else {
+    const s = result.scores;
+    result.total = (s.publicProfile||0)+(s.socialMedia||0)+(s.appearanceFee||0)+(s.accolades||0);
+    if (result.total >= 11) result.tier = 0;
+    else if (result.total >= 8) result.tier = 1;
+    else if (result.total >= 4) result.tier = 2;
+    else result.tier = 3;
+  }
+  const commissions = ['$10,000','$5,000','$2,500','No Commission'];
+  result.commission = commissions[result.tier];
+
+
+  return result;
+}
+
+async function fetchGoogleTrends(name) {
+  try {
+    // Google Trends CSV endpoint — no API key required
+    const encoded = encodeURIComponent(name);
+    const url = `https://trends.google.com/trends/api/explore?hl=en-US&tz=300&req=%7B%22comparisonItem%22%3A%5B%7B%22keyword%22%3A%22${encoded}%22%2C%22geo%22%3A%22US%22%2C%22time%22%3A%22today%205-y%22%7D%5D%2C%22category%22%3A0%2C%22property%22%3A%22%22%7D`;
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) return null;
+    const text = await res.text();
+    // Google Trends prepends )]}' to responses — strip it
+    const clean = text.replace(/^\)\]\}',?/, '').trim();
+    const data = JSON.parse(clean);
+    // Extract average interest value from widgets
+    const timelineWidget = data.widgets?.find(w => w.id === 'TIMESERIES');
+    if (!timelineWidget) return null;
+    return { token: timelineWidget.token, request: timelineWidget.request };
+  } catch(e) { return null; }
+}
+
+async function scoreSpeaker(name, updateSteps) {
+  updateSteps && updateSteps(1);
+  const [wikiData, trendsData] = await Promise.all([
+    fetchWikipediaData(name),
+    fetchGoogleTrends(name)
+  ]);
+  updateSteps && updateSteps(2);
+  const result = await researchWithWebSearch(name, wikiData, trendsData);
+  updateSteps && updateSteps(3);
+  return result;
+}
+
+function setStep(stepNum) {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById(`step${i}`);
+    const icon = el.querySelector('.step-icon');
+    if (i < stepNum) { el.className = 'status-step done'; icon.textContent = '✓'; }
+    else if (i === stepNum) { el.className = 'status-step active-step'; icon.textContent = '●'; }
+    else { el.className = 'status-step'; icon.textContent = '○'; }
+  }
+}
+
+function resetSteps() {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById(`step${i}`);
+    el.className = 'status-step';
+    el.querySelector('.step-icon').textContent = '○';
+  }
+}
+
+function tierColor(tier) { return ['tier-0','tier-1','tier-2','tier-3'][tier] || 'tier-3'; }
+function tierPillClass(tier) { return ['t0','t1','t2','t3'][tier] || 't3'; }
+function scoreColor(score) {
+  if (score === 3) return '#f0c040';
+  if (score === 2) return '#60a5fa';
+  if (score === 1) return '#a78bfa';
+  return '#2a2a38';
+}
+function formatNum(n) {
+  if (!n) return 'N/A';
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(0) + 'K';
+  return n.toLocaleString();
+}
+
+function renderCard(data) {
+  const tc = tierColor(data.tier);
+  const tp = tierPillClass(data.tier);
+  const labels = ['Public Profile','Social Media','Open Market Appearance Fee','Accolades'];
+  const keys = ['publicProfile','socialMedia','appearanceFee','accolades'];
+
+  const scoreRows = keys.map((k, i) => {
+    const val = data.scores[k];
+    const pct = (val / 3) * 100;
+    return `
+      <div class="score-row">
+        <div class="score-label">
+          <span>${labels[i]}</span>
+          <span class="val">${val}/3</span>
+        </div>
+        <div class="score-track">
+          <div class="score-fill" style="width:${pct}%; background:${scoreColor(val)}"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const totalColor = ['var(--tier0)','var(--tier1)','var(--tier2)','var(--tier3)'][data.tier] || 'var(--tier3)';
+  const isBubble = data.bubbleReview;
+  const isOverride = data.tier0Override;
+
+  const dp = data.dataPoints || {};
+  const annualRows = dp.annualViews?.map(y =>
+    `<div class="wiki-stat"><div class="wlabel">${y.year} Views</div><div class="wval">${formatNum(y.views)}</div></div>`
+  ).join('') || '';
+
+  const wikiBlock = (dp.annualViews || dp.totalSocialFollowers > 0 || dp.trendsAvg !== undefined) ? `
+    <div class="wiki-data">
+      ${dp.wikiTitle ? `<div class="wiki-stat"><div class="wlabel">Wikipedia</div><div class="wval">${dp.wikiTitle}</div></div>` : ''}
+      ${annualRows}
+      ${dp.totalSocialFollowers > 0 ? `
+        <div class="wiki-stat"><div class="wlabel">Social (Combined)</div><div class="wval">${dp.estimatedSocialFollowing}</div></div>
+        ${dp.instagram > 0 ? `<div class="wiki-stat"><div class="wlabel">↳ Instagram</div><div class="wval">${dp.instagram >= 1000000 ? (dp.instagram/1000000).toFixed(1)+'M' : Math.round(dp.instagram/1000)+'K'}</div></div>` : ''}
+        ${dp.twitter > 0 ? `<div class="wiki-stat"><div class="wlabel">↳ X/Twitter</div><div class="wval">${dp.twitter >= 1000000 ? (dp.twitter/1000000).toFixed(1)+'M' : Math.round(dp.twitter/1000)+'K'}</div></div>` : ''}
+        ${dp.tiktok > 0 ? `<div class="wiki-stat"><div class="wlabel">↳ TikTok</div><div class="wval">${dp.tiktok >= 1000000 ? (dp.tiktok/1000000).toFixed(1)+'M' : Math.round(dp.tiktok/1000)+'K'}</div></div>` : ''}
+        ${dp.facebook > 0 ? `<div class="wiki-stat"><div class="wlabel">↳ Facebook</div><div class="wval">${dp.facebook >= 1000000 ? (dp.facebook/1000000).toFixed(1)+'M' : Math.round(dp.facebook/1000)+'K'}</div></div>` : ''}
+        ${dp.linkedin > 0 ? `<div class="wiki-stat"><div class="wlabel">↳ LinkedIn</div><div class="wval">${dp.linkedin >= 1000000 ? (dp.linkedin/1000000).toFixed(1)+'M' : Math.round(dp.linkedin/1000)+'K'}</div></div>` : ''}
+        ${dp.threads > 0 ? `<div class="wiki-stat"><div class="wlabel">↳ Threads</div><div class="wval">${dp.threads >= 1000000 ? (dp.threads/1000000).toFixed(1)+'M' : Math.round(dp.threads/1000)+'K'}</div></div>` : ''}
+      ` : dp.estimatedSocialFollowing ? `<div class="wiki-stat"><div class="wlabel">Social Following</div><div class="wval">${dp.estimatedSocialFollowing}</div></div>` : ''}
+      ${dp.hasNationalBestseller ? `<div class="wiki-stat"><div class="wlabel">National Bestseller</div><div class="wval">✓ Yes</div></div>` : ''}
+      ${dp.hasAwardWin ? `<div class="wiki-stat"><div class="wlabel">Award Win</div><div class="wval">✓ Yes</div></div>` : ''}
+      ${dp.hasAwardNomination && !dp.hasAwardWin ? `<div class="wiki-stat"><div class="wlabel">Award Nomination</div><div class="wval">✓ Yes</div></div>` : ''}
+      ${dp.hasForbesList ? `<div class="wiki-stat"><div class="wlabel">Forbes/Time List</div><div class="wval">✓ Yes</div></div>` : ''}
+      ${dp.hasTED ? `<div class="wiki-stat"><div class="wlabel">TED Main Stage</div><div class="wval">✓ Yes</div></div>` : ''}
+      ${dp.trendsAvg !== undefined ? `<div class="wiki-stat"><div class="wlabel">Google Trends Avg</div><div class="wval">${dp.trendsAvg}/100</div></div>` : ''}
+      ${dp.estimatedFee ? `<div class="wiki-stat"><div class="wlabel">Est. Appearance Fee</div><div class="wval">${dp.estimatedFee}</div></div>` : ''}
+      ${dp.notableAwards ? `<div class="wiki-stat"><div class="wlabel">Accolades</div><div class="wval">${dp.notableAwards}</div></div>` : ''}
+    </div>` : '';
+
+  return `
+    <div class="speaker-card ${tc}">
+      <div class="card-header">
+        <div class="speaker-name">${data.name}</div>
+        <div class="tier-pill ${tp}">Tier ${data.tier}</div>
+      </div>
+      <div class="live-data-row">
+        ${data.liveWiki ? '<div class="live-chip"><div class="live-dot"></div> Wikipedia Live</div>' : ''}
+        ${data.liveTrends ? '<div class="live-chip"><div class="live-dot"></div> Google Trends Live</div>' : ''}
+        <div class="live-chip"><div class="live-dot"></div> Web Search Verified</div>
+      </div>
+      <div class="scores-grid">${scoreRows}</div>
+      <div class="complexity-row">
+        <div class="complexity-label">
+          <span>Booking Complexity</span>
+          <span class="complexity-hint">Set manually — only you know how hard this was</span>
+        </div>
+        <div class="complexity-selector">
+          <button class="cx-btn ${(data.bookingComplexity === 0) ? "cx-active" : ""}" onclick="setComplexityByIdx(${results.indexOf(data)}, 0)">
+            <span class="cx-score">0</span><span class="cx-desc">Standard</span>
+          </button>
+          <button class="cx-btn ${(data.bookingComplexity === 1) ? "cx-active" : ""}" onclick="setComplexityByIdx(${results.indexOf(data)}, 1)">
+            <span class="cx-score">1</span><span class="cx-desc">Relationship / Multi-Layer</span>
+          </button>
+          <button class="cx-btn ${(data.bookingComplexity === 2) ? "cx-active" : ""}" onclick="setComplexityByIdx(${results.indexOf(data)}, 2)">
+            <span class="cx-score">2</span><span class="cx-desc">Exceptionally Difficult</span>
+          </button>
+        </div>
+      </div>
+      <div class="total-score">
+        <span class="total-label">Total Score</span>
+        <span class="total-val" style="color:${totalColor}">${data.total} / ${data.bookingComplexity !== undefined ? 14 : 12}</span>
+        <span class="commission" style="color:${totalColor}">${data.commission}</span>
+      </div>
+      ${isBubble ? `<div class="bubble-flag">⚠ Bubble Review Recommended — ${data.bubbleNote || 'This speaker sits on a tier boundary. Group discussion recommended before finalizing.'}</div>` : ''}
+      ${isOverride ? `<div class="override-flag">★ Tier 0 Override Candidate — ${data.tier0OverrideNote || 'This figure may qualify for Tier 0 based on historic or cultural significance regardless of score.'}</div>` : ''}
+      <div class="reasoning">${data.reasoning}</div>
+      ${wikiBlock}
+    </div>`;
+}
+
+function setComplexityByIdx(idx, value) {
+  if (idx === -1 || idx >= results.length) return;
+  results[idx].bookingComplexity = value;
+  const r = results[idx];
+  if (r.tier0Override) {
+    r.total = 12 + value;
+    r.tier = 0;
+  } else {
+    const s = r.scores;
+    const base = (s.publicProfile||0)+(s.socialMedia||0)+(s.appearanceFee||0)+(s.accolades||0);
+    r.total = base + value;
+    if (r.total >= 12) r.tier = 0;
+    else if (r.total >= 9) r.tier = 1;
+    else if (r.total >= 5) r.tier = 2;
+    else r.tier = 3;
+  }
+  const commissions = ['$10,000','$5,000','$2,500','No Commission'];
+  r.commission = commissions[r.tier];
+  renderResults();
+}
+
+function renderResults() {
+  const area = document.getElementById('resultsArea');
+  if (results.length === 0) {
+    area.innerHTML = `<div class="empty-state"><div class="icon">◈</div><p>Enter a speaker name above to generate<br>a live data-backed tier assessment.</p></div>`;
+    return;
+  }
+  const header = `<div class="results-header"><div class="results-title">Results</div><div class="results-count">${results.length} speaker${results.length !== 1 ? 's' : ''} scored</div></div>`;
+  area.innerHTML = header + results.map(r => {
+    if (r.error) return `<div class="error-card">Could not score <strong>${r.name}</strong>: ${r.error}</div>`;
+    return renderCard(r);
+  }).join('');
+}
+
+async function scoreSingle() {
+  const input = document.getElementById('nameInput');
+  const name = input.value.trim();
+  if (!name || isRunning) return;
+
+  isRunning = true;
+  document.getElementById('scoreBtn').disabled = true;
+  document.getElementById('loadingBar').classList.add('active');
+  document.getElementById('statusSteps').classList.add('active');
+  resetSteps();
+
+  try {
+    const data = await scoreSpeaker(name, setStep);
+    results.unshift(data);
+    input.value = '';
+  } catch(e) {
+    let errorMsg = e.message;
+    if (errorMsg === 'Failed to fetch' || errorMsg.includes('NetworkError') || errorMsg.includes('CORS')) {
+      errorMsg = 'Network error — please check your connection and try again.';
+    }
+    results.unshift({ name, error: errorMsg });
+  }
+
+  isRunning = false;
+  document.getElementById('scoreBtn').disabled = false;
+  document.getElementById('loadingBar').classList.remove('active');
+  document.getElementById('statusSteps').classList.remove('active');
+  renderResults();
+}
+
+async function runBatch() {
+  const textarea = document.getElementById('batchInput');
+  const names = textarea.value.split('\n').map(n => n.trim()).filter(Boolean);
+  if (!names.length) return;
+
+  closeBatch();
+  isRunning = true;
+  document.getElementById('scoreBtn').disabled = true;
+  document.getElementById('loadingBar').classList.add('active');
+  const progress = document.getElementById('progressInfo');
+  progress.classList.add('active');
+
+  for (let i = 0; i < names.length; i++) {
+    progress.textContent = `Scoring ${i + 1} of ${names.length}: ${names[i]}...`;
+    try {
+      const data = await scoreSpeaker(names[i], null);
+      results.unshift(data);
+    } catch(e) {
+      results.unshift({ name: names[i], error: e.message });
+    }
+    renderResults();
+    if (i < names.length - 1) await new Promise(r => setTimeout(r, 1200));
+  }
+
+  isRunning = false;
+  document.getElementById('scoreBtn').disabled = false;
+  document.getElementById('loadingBar').classList.remove('active');
+  progress.classList.remove('active');
+}
+
+function openBatch() {
+  document.getElementById('batchInput').value = `Adam Grant
+Andrew Yang
+Andy Cohen
+Anita Hill
+Arnold Schwarzenegger
+Barbara Corcoran
+Bill Gates
+Bill Nye
+Bozoma Saint John
+Brene Brown
+Carla Hall
+Charlene Li
+Charles Duhigg
+Christina Wallace
+Daymond John
+Deion Sanders
+Dr. Bernice King
+Dr. Drew
+Dr. Oz
+Dr. Shefali
+Emily Balcetis
+Erica Dhawan
+Gabrielle Union
+His Holiness the Dalai Lama
+Hoda Kotb
+Jack Black
+Jamie Foxx
+Jim Kwik
+Jonah Berger
+Judge Frank Caprio
+Kate McKinnon
+Kelly Ripa
+Ketanji Brown Jackson
+Kevin Bacon
+Kevin Hart
+Lindsey Vonn
+Malcolm Gladwell
+Mark Cuban
+Matthew McConaughey
+Mehdi Hasan
+Neil Patrick Harris
+Oprah Winfrey
+President Barack Obama
+President Bill Clinton
+President George W. Bush
+Rachael Ray
+Robin Roberts
+Rohit Bhargava
+Ryan Serhant
+Scott Hamilton
+Sebastian Maniscalco
+Sheryl Sandberg
+Simon Sinek
+Sir Richard Branson
+Steve Madden
+Suze Orman
+Sylvester Stallone
+Tamron Hall
+Tanya Acker
+Terry Crews
+Thaddeus Bullard
+Tiki Barber
+Trevor Noah
+Valerie Jarrett
+Wendy Williams`;
+  document.getElementById('batchModal').classList.add('active');
+}
+
+function closeBatch() {
+  document.getElementById('batchModal').classList.remove('active');
+}
+
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') scoreSingle();
+});
+
+document.getElementById('batchModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('batchModal')) closeBatch();
+});
+</script>
+</body>
+</html>
