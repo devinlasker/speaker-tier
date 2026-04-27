@@ -694,9 +694,15 @@ ${wikiContext}
 ${trendsContext}
 
 Search the web for current information on:
-- Their social media following on EACH platform separately: Instagram, X/Twitter, TikTok, Facebook, Threads, LinkedIn
+- Social media: Run a SEPARATE search for EACH platform below. Do not combine into one search.
+  Search 1: "[name] Instagram followers"
+  Search 2: "[name] X Twitter followers"
+  Search 3: "[name] TikTok followers"
+  Search 4: "[name] Facebook followers"
+  Search 5: "[name] LinkedIn followers"
+  Search 6: "[name] Threads followers"
   Report each platform's follower count individually in the dataPoints fields (instagram, twitter, tiktok, facebook, threads, linkedin).
-  Set to 0 if they don't have that platform. We will calculate the total and score automatically — do NOT score socialMedia yourself, set it to 0.
+  Set to 0 if they don't have that platform or no data found. We will calculate the total and score automatically — do NOT score socialMedia yourself, set it to 0.
 - Their speaking fee — search "[name] speaking fee" and "[name] keynote fee" on speaker bureau sites. Report the fee range you find in estimatedFee.
 - Major awards, nominations, or NYT/WSJ bestseller list status
 - Their career achievements, legacy, and cultural impact
@@ -838,8 +844,8 @@ Respond ONLY with valid JSON — no markdown, no extra text:
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 4 }],
+        max_tokens: 2000,
+        tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 12 }],
         messages: [{ role: "user", content: prompt }]
       })
     });
