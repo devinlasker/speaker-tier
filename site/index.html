@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -545,6 +544,16 @@
   .cx-score { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 700; line-height: 1; }
   .cx-desc { font-size: 10px; text-align: center; line-height: 1.3; }
 
+  .savings-row { margin: 12px 0; padding: 14px 16px; background: rgba(74,222,128,0.05); border: 1px solid rgba(74,222,128,0.15); border-radius: 10px; }
+  .savings-title { font-family: 'DM Mono', monospace; font-size: 11px; color: #4ade80; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .savings-grid { display: flex; gap: 16px; flex-wrap: wrap; }
+  .savings-item { display: flex; flex-direction: column; gap: 3px; }
+  .savings-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .savings-val { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--text); }
+  .savings-cost { color: #fca5a5; }
+  .savings-saved { color: #4ade80; font-size: 16px; font-weight: 700; }
+  .savings-highlight { padding: 6px 12px; background: rgba(74,222,128,0.08); border-radius: 6px; }
+
   .pdf-modal-overlay {
     position: fixed;
     inset: 0;
@@ -698,6 +707,62 @@
 </div>
 
 <script>
+
+const BOOK_PURCHASE_DATA = {
+  // Market fees sourced from speaker bureau sites (AllAmericanSpeakers, BigSpeak, GothamArtists, etc.)
+  "Arnold Schwarzenegger":    { bookCost: 21325,      marketFee: 500000 },  // $500K+
+  "Adam Grant":               { bookCost: 12795,      marketFee: 200000 },  // $150K-$200K
+  "Emily Balcetis":           { bookCost: 6500,       marketFee: 50000  },  // ~$50K
+  "Tamron Hall":              { bookCost: 10662.50,   marketFee: 125000 },  // $100K-$125K (Gotham Artists)
+  "Deion Sanders":            { bookCost: 19192.50,   marketFee: 300000 },  // $200K-$300K (Gotham Artists)
+  "Kate McKinnon":            { bookCost: 7197.19,    marketFee: 150000 },  // ~$150K
+  "Ketanji Brown Jackson":    { bookCost: 19192.50,   marketFee: 200000 },  // ~$200K
+  "Frank Caprio":             { bookCost: 10775.79,   marketFee: 50000  },  // ~$50K
+  "Judge Frank Caprio":       { bookCost: 10775.79,   marketFee: 50000  },
+  "Malcolm Gladwell":         { bookCost: 12795,      marketFee: 200000 },  // $150K-$200K
+  "Matthew McConaughey":      { bookCost: 31907.66,   marketFee: 500000 },  // $500K+
+  "Jonah Berger":             { bookCost: 10662.50,   marketFee: 100000 },  // ~$100K
+  "Lindsey Vonn":             { bookCost: 8530,       marketFee: 300000 },  // $200K-$300K (Gotham Artists)
+  "Terry Crews":              { bookCost: 13514.75,   marketFee: 125000 },  // $100K-$125K (Gotham Artists)
+  "Robin Roberts":            { bookCost: 15354,      marketFee: 200000 },  // ~$200K
+  "Andrew Yang":              { bookCost: 7597.03,    marketFee: 75000  },  // ~$75K
+  "Kelly Ripa":               { bookCost: 11195.63,   marketFee: 200000 },  // ~$200K (long-running national host)
+  "Kevin Hart":               { bookCost: 19192.50,   marketFee: 500000 },  // $500K+
+  "Erica Dhawan":             { bookCost: 5149,       marketFee: 75000  },  // ~$75K
+  "Bill Gates":               { bookCost: 76770,      marketFee: 500000 },  // $500K+
+  "President George W. Bush": { bookCost: 53312.50,   marketFee: 500000 },  // $500K+
+  "George W. Bush":           { bookCost: 53312.50,   marketFee: 500000 },
+  "President Barack Obama":   { bookCost: 119366.79,  marketFee: 500000 },  // $500K+
+  "Barack Obama":             { bookCost: 119366.79,  marketFee: 500000 },
+  "Gabrielle Union":          { bookCost: 14927.50,   marketFee: 150000 },  // ~$150K
+  "Jamie Foxx":               { bookCost: 21751.51,   marketFee: 300000 },  // ~$300K
+  "Rachael Ray":              { bookCost: 11942,      marketFee: 100000 },  // ~$100K
+  "President Bill Clinton":   { bookCost: 50000,      marketFee: 500000 },  // $500K+
+  "Bill Clinton":             { bookCost: 50000,      marketFee: 500000 },
+  "Neil Patrick Harris":      { bookCost: 12681,      marketFee: 150000 },  // ~$150K
+  "Tanya Acker":              { bookCost: 6297,       marketFee: 50000  },  // ~$50K
+  "Bill Nye":                 { bookCost: 10000,      marketFee: 75000  },  // ~$75K
+  "Jack Black":               { bookCost: 10000,      marketFee: 200000 },  // ~$200K
+  "Ryan Serhant":             { bookCost: 0,          marketFee: 100000 },  // ~$100K
+  "Hoda Kotb":                { bookCost: 0,          marketFee: 200000 },  // ~$200K
+  "Sebastian Maniscalco":     { bookCost: 0,          marketFee: 300000 }   // ~$300K
+};
+
+function getBookData(name) {
+  if (BOOK_PURCHASE_DATA[name]) return BOOK_PURCHASE_DATA[name];
+  const lower = name.toLowerCase();
+  for (const key of Object.keys(BOOK_PURCHASE_DATA)) {
+    if (key.toLowerCase() === lower) return BOOK_PURCHASE_DATA[key];
+    if (lower.includes(key.toLowerCase()) || key.toLowerCase().includes(lower)) return BOOK_PURCHASE_DATA[key];
+  }
+  return null;
+}
+
+function formatMoney(n) {
+  if (n >= 500000) return '$500,000+';
+  return '$' + n.toLocaleString();
+}
+
 // ============================================================
 // Backend Worker URL — update this if you ever recreate the Worker
 const WORKER_URL = 'https://speaker-rankings-tool.dlasker.workers.dev';
@@ -1176,6 +1241,20 @@ function renderCard(data) {
       ${isBubble ? `<div class="bubble-flag">⚠ Bubble Review Recommended — ${data.bubbleNote || 'This speaker sits on a tier boundary. Group discussion recommended before finalizing.'}</div>` : ''}
       ${isOverride ? `<div class="override-flag">★ Tier 0 Override Candidate — ${data.tier0OverrideNote || 'This figure may qualify for Tier 0 based on historic or cultural significance regardless of score.'}</div>` : ''}
       <div class="reasoning">${data.reasoning}</div>
+      ${(() => {
+        const bd = getBookData(data.name);
+        if (!bd || bd.bookCost === 0) return '';
+        const savings = bd.marketFee - bd.bookCost;
+        const savingsPct = Math.round((savings / bd.marketFee) * 100);
+        return `<div class="savings-row">
+          <div class="savings-title">📚 Book Purchase vs. Market Rate</div>
+          <div class="savings-grid">
+            <div class="savings-item"><div class="savings-label">Books Paid</div><div class="savings-val savings-cost">$${bd.bookCost.toLocaleString()}</div></div>
+            <div class="savings-item"><div class="savings-label">Market Rate</div><div class="savings-val">${formatMoney(bd.marketFee)}</div></div>
+            <div class="savings-item savings-highlight"><div class="savings-label">Estimated Savings</div><div class="savings-val savings-saved">$${savings.toLocaleString()} (${savingsPct}%)</div></div>
+          </div>
+        </div>`;
+      })()}
       ${wikiBlock}
     </div>`;
 }
@@ -1409,6 +1488,43 @@ function downloadPDF(bookingDateStr, noteStr) {
         y += 5;
       });
       y += 2;
+    }
+
+    // Savings section
+    const bd = getBookData(r.name);
+    if (bd && bd.bookCost > 0) {
+      const savings = bd.marketFee - bd.bookCost;
+      const savingsPct = Math.round((savings / bd.marketFee) * 100);
+      checkPage(22);
+      doc.setFillColor(10, 40, 20);
+      doc.roundedRect(margin, y, contentW, 20, 2, 2, 'F');
+      doc.setDrawColor(74, 222, 128);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(margin, y, contentW, 20, 2, 2, 'S');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(74, 222, 128);
+      doc.text('BOOK PURCHASE VS. MARKET RATE', margin + 5, y + 5);
+
+      const cols = [
+        { label: 'Books Paid', val: '$' + bd.bookCost.toLocaleString() },
+        { label: 'Market Rate', val: formatMoney(bd.marketFee) },
+        { label: 'Estimated Savings', val: '$' + savings.toLocaleString() + ' (' + savingsPct + '%)' }
+      ];
+      const cw = contentW / 3;
+      cols.forEach((col, ci) => {
+        const cx = margin + ci * cw + 4;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(107, 107, 133);
+        doc.text(col.label.toUpperCase(), cx, y + 11);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(ci === 2 ? 10 : 9);
+        doc.setTextColor(ci === 2 ? 74 : ci === 0 ? 252 : 220, ci === 2 ? 222 : ci === 0 ? 165 : 220, ci === 2 ? 128 : ci === 0 ? 165 : 235);
+        doc.text(col.val, cx, y + 17);
+      });
+      y += 22;
     }
 
     y += 8;
