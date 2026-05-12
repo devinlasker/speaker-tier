@@ -1551,8 +1551,14 @@ function downloadPDF(bookingDateStr, noteStr) {
       y += 22;
     }
 
-    y += 8;
+    // Force new page after each speaker
+    doc.addPage();
+    y = 18;
   });
+
+  // Remove last blank page
+  const pageCount = doc.getNumberOfPages();
+  if (pageCount > 1) doc.deletePage(pageCount);
 
   // Footer
   const totalPages = doc.getNumberOfPages();
