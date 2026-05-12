@@ -1362,12 +1362,12 @@ function downloadPDF(bookingDateStr, noteStr) {
 
   const scored = results.filter(r => !r.error);
 
-  scored.forEach((r) => {
+  scored.forEach((r, rIdx) => {
     const tierColor = tierColors[r.tier] || tierColors[3];
     const dp = r.dataPoints || {};
 
-    // Estimate card height
-    checkPage(20);
+    // Each speaker starts on a fresh page (except the first)
+    if (rIdx > 0) { doc.addPage(); y = 18; }
 
     // Card background
     doc.setFillColor(19, 19, 26);
@@ -1551,14 +1551,8 @@ function downloadPDF(bookingDateStr, noteStr) {
       y += 22;
     }
 
-    // Force new page after each speaker
-    doc.addPage();
-    y = 18;
+    y += 8;
   });
-
-  // Remove last blank page
-  const pageCount = doc.getNumberOfPages();
-  if (pageCount > 1) doc.deletePage(pageCount);
 
   // Footer
   const totalPages = doc.getNumberOfPages();
