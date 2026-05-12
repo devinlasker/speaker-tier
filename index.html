@@ -20,9 +20,9 @@
     --tier3: #6b6b85;
     --accent: #f0c040;
   }
- 
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
- 
+
   body {
     background: var(--bg);
     color: var(--text);
@@ -30,7 +30,7 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
- 
+
   body::before {
     content: '';
     position: fixed;
@@ -42,7 +42,7 @@
     pointer-events: none;
     z-index: 0;
   }
- 
+
   .container {
     max-width: 960px;
     margin: 0 auto;
@@ -50,9 +50,9 @@
     position: relative;
     z-index: 1;
   }
- 
+
   header { margin-bottom: 56px; }
- 
+
   .eyebrow {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
@@ -61,7 +61,7 @@
     text-transform: uppercase;
     margin-bottom: 16px;
   }
- 
+
   h1 {
     font-family: 'Playfair Display', serif;
     font-size: clamp(36px, 6vw, 64px);
@@ -70,23 +70,23 @@
     color: var(--text);
     margin-bottom: 16px;
   }
- 
+
   h1 span { color: var(--accent); }
- 
+
   .subtitle {
     font-size: 15px;
     color: var(--muted);
     max-width: 500px;
     line-height: 1.6;
   }
- 
+
   .data-sources {
     display: flex;
     gap: 8px;
     margin-top: 12px;
     flex-wrap: wrap;
   }
- 
+
   .source-tag {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -97,20 +97,20 @@
     color: var(--muted);
     text-transform: uppercase;
   }
- 
+
   .source-tag.live {
     border-color: rgba(74,222,128,0.3);
     color: #4ade80;
     background: rgba(74,222,128,0.06);
   }
- 
+
   .tier-legend {
     display: flex;
     gap: 12px;
     margin-bottom: 40px;
     flex-wrap: wrap;
   }
- 
+
   .tier-badge {
     display: flex;
     align-items: center;
@@ -121,14 +121,14 @@
     font-size: 12px;
     border: 1px solid;
   }
- 
+
   .tier-badge.t0 { border-color: var(--tier0); color: var(--tier0); background: rgba(240,192,64,0.06); }
   .tier-badge.t1 { border-color: var(--tier1); color: var(--tier1); background: rgba(96,165,250,0.06); }
   .tier-badge.t2 { border-color: var(--tier2); color: var(--tier2); background: rgba(167,139,250,0.06); }
   .tier-badge.t3 { border-color: var(--tier3); color: var(--tier3); background: rgba(107,107,133,0.06); }
- 
+
   .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
- 
+
   .search-section {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -136,13 +136,13 @@
     padding: 32px;
     margin-bottom: 40px;
   }
- 
+
   .search-row {
     display: flex;
     gap: 12px;
     margin-bottom: 16px;
   }
- 
+
   .search-input {
     flex: 1;
     background: var(--bg);
@@ -155,10 +155,10 @@
     outline: none;
     transition: border-color 0.2s;
   }
- 
+
   .search-input:focus { border-color: var(--accent); }
   .search-input::placeholder { color: var(--muted); }
- 
+
   .btn {
     padding: 14px 28px;
     border-radius: 8px;
@@ -171,25 +171,25 @@
     transition: all 0.2s;
     white-space: nowrap;
   }
- 
+
   .btn-primary { background: var(--accent); color: #000; }
   .btn-primary:hover { background: #f5d060; transform: translateY(-1px); }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
- 
+
   .btn-secondary {
     background: transparent;
     color: var(--muted);
     border: 1px solid var(--border);
   }
   .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
- 
+
   .batch-hint {
     font-size: 13px;
     color: var(--muted);
     font-family: 'DM Mono', monospace;
   }
   .batch-hint span { color: var(--accent); cursor: pointer; text-decoration: underline; }
- 
+
   .loading-bar {
     height: 2px;
     background: var(--border);
@@ -199,7 +199,7 @@
     display: none;
   }
   .loading-bar.active { display: block; }
- 
+
   .loading-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--accent), #60a5fa);
@@ -207,12 +207,12 @@
     animation: loading 1.5s ease-in-out infinite;
     width: 40%;
   }
- 
+
   @keyframes loading {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(350%); }
   }
- 
+
   .status-steps {
     margin-top: 14px;
     display: none;
@@ -220,7 +220,7 @@
     gap: 4px;
   }
   .status-steps.active { display: flex; }
- 
+
   .status-step {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
@@ -233,14 +233,14 @@
   .status-step.done { color: #4ade80; }
   .status-step.active-step { color: var(--accent); }
   .step-icon { width: 14px; text-align: center; }
- 
+
   .results-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
   }
- 
+
   .results-title {
     font-family: 'DM Mono', monospace;
     font-size: 12px;
@@ -248,13 +248,13 @@
     color: var(--muted);
     text-transform: uppercase;
   }
- 
+
   .results-count {
     font-family: 'DM Mono', monospace;
     font-size: 12px;
     color: var(--accent);
   }
- 
+
   .speaker-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -263,17 +263,17 @@
     margin-bottom: 16px;
     animation: fadeIn 0.3s ease;
   }
- 
+
   .speaker-card.tier-0 { border-left: 3px solid var(--tier0); }
   .speaker-card.tier-1 { border-left: 3px solid var(--tier1); }
   .speaker-card.tier-2 { border-left: 3px solid var(--tier2); }
   .speaker-card.tier-3 { border-left: 3px solid var(--tier3); }
- 
+
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
- 
+
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -281,14 +281,14 @@
     margin-bottom: 16px;
     gap: 16px;
   }
- 
+
   .speaker-name {
     font-family: 'Playfair Display', serif;
     font-size: 22px;
     font-weight: 700;
     color: var(--text);
   }
- 
+
   .tier-pill {
     padding: 4px 14px;
     border-radius: 100px;
@@ -298,19 +298,19 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
- 
+
   .tier-pill.t0 { background: rgba(240,192,64,0.15); color: var(--tier0); border: 1px solid rgba(240,192,64,0.3); }
   .tier-pill.t1 { background: rgba(96,165,250,0.15); color: var(--tier1); border: 1px solid rgba(96,165,250,0.3); }
   .tier-pill.t2 { background: rgba(167,139,250,0.15); color: var(--tier2); border: 1px solid rgba(167,139,250,0.3); }
   .tier-pill.t3 { background: rgba(107,107,133,0.15); color: var(--tier3); border: 1px solid rgba(107,107,133,0.3); }
- 
+
   .live-data-row {
     display: flex;
     gap: 8px;
     margin-bottom: 16px;
     flex-wrap: wrap;
   }
- 
+
   .live-chip {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -323,7 +323,7 @@
     align-items: center;
     gap: 5px;
   }
- 
+
   .live-chip .live-dot {
     width: 5px;
     height: 5px;
@@ -331,23 +331,23 @@
     background: #4ade80;
     animation: pulse 2s infinite;
   }
- 
+
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
   }
- 
+
   .scores-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     margin-bottom: 20px;
   }
- 
+
   @media (max-width: 600px) { .scores-grid { grid-template-columns: 1fr; } }
- 
+
   .score-row { display: flex; flex-direction: column; gap: 6px; }
- 
+
   .score-label {
     font-size: 11px;
     color: var(--muted);
@@ -358,23 +358,23 @@
     justify-content: space-between;
     align-items: center;
   }
- 
+
   .score-label .val { color: var(--text); font-weight: 500; }
   .live-indicator { font-size: 9px; color: #4ade80; margin-left: 4px; }
- 
+
   .score-track {
     height: 4px;
     background: var(--surface2);
     border-radius: 2px;
     overflow: hidden;
   }
- 
+
   .score-fill {
     height: 100%;
     border-radius: 2px;
     transition: width 0.6s ease;
   }
- 
+
   .total-score {
     display: flex;
     align-items: center;
@@ -384,7 +384,7 @@
     border-radius: 8px;
     margin-bottom: 16px;
   }
- 
+
   .total-label {
     font-family: 'DM Mono', monospace;
     font-size: 12px;
@@ -392,13 +392,13 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
- 
+
   .total-val {
     font-family: 'Playfair Display', serif;
     font-size: 24px;
     font-weight: 700;
   }
- 
+
   .commission {
     font-family: 'DM Mono', monospace;
     font-size: 13px;
@@ -406,7 +406,7 @@
     border-radius: 4px;
     background: var(--surface);
   }
- 
+
   .reasoning {
     font-size: 13px;
     line-height: 1.7;
@@ -415,7 +415,7 @@
     padding-top: 16px;
     margin-bottom: 12px;
   }
- 
+
   .wiki-data {
     background: var(--surface2);
     border-radius: 8px;
@@ -427,11 +427,11 @@
     gap: 20px;
     flex-wrap: wrap;
   }
- 
+
   .wiki-stat { display: flex; flex-direction: column; gap: 2px; }
   .wiki-stat .wlabel { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
   .wiki-stat .wval { color: var(--text); font-size: 13px; }
- 
+
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -443,7 +443,7 @@
     padding: 24px;
   }
   .modal-overlay.active { display: flex; }
- 
+
   .modal {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -452,20 +452,20 @@
     max-width: 500px;
     width: 100%;
   }
- 
+
   .modal h3 {
     font-family: 'Playfair Display', serif;
     font-size: 22px;
     margin-bottom: 8px;
   }
- 
+
   .modal p {
     font-size: 13px;
     color: var(--muted);
     margin-bottom: 20px;
     line-height: 1.6;
   }
- 
+
   .modal textarea {
     width: 100%;
     background: var(--bg);
@@ -482,7 +482,7 @@
   }
   .modal textarea:focus { border-color: var(--accent); }
   .modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
- 
+
   .error-card {
     background: rgba(239,68,68,0.08);
     border: 1px solid rgba(239,68,68,0.2);
@@ -492,7 +492,7 @@
     color: #fca5a5;
     margin-bottom: 16px;
   }
- 
+
   .progress-info {
     font-family: 'DM Mono', monospace;
     font-size: 12px;
@@ -501,7 +501,7 @@
     display: none;
   }
   .progress-info.active { display: block; }
- 
+
   .empty-state {
     text-align: center;
     padding: 80px 24px;
@@ -509,7 +509,7 @@
   }
   .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
   .empty-state p { font-size: 14px; line-height: 1.6; }
- 
+
   .bubble-flag {
     background: rgba(251,191,36,0.08);
     border: 1px solid rgba(251,191,36,0.3);
@@ -521,7 +521,7 @@
     margin-bottom: 12px;
     line-height: 1.6;
   }
- 
+
   .override-flag {
     background: rgba(240,192,64,0.08);
     border: 1px solid rgba(240,192,64,0.4);
@@ -533,7 +533,7 @@
     margin-bottom: 12px;
     line-height: 1.6;
   }
- 
+
   .complexity-row { margin: 12px 0; padding: 14px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; }
   .complexity-label { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); }
   .complexity-hint { font-size: 11px; color: var(--muted); font-style: italic; }
@@ -543,7 +543,7 @@
   .cx-btn.cx-active { background: rgba(99,179,237,0.12); border-color: rgba(99,179,237,0.4); color: #63B3ED; }
   .cx-score { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 700; line-height: 1; }
   .cx-desc { font-size: 10px; text-align: center; line-height: 1.3; }
- 
+
   .savings-row { margin: 12px 0; padding: 14px 16px; background: rgba(74,222,128,0.05); border: 1px solid rgba(74,222,128,0.15); border-radius: 10px; }
   .savings-title { font-family: 'DM Mono', monospace; font-size: 11px; color: #4ade80; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
   .savings-grid { display: flex; gap: 16px; flex-wrap: wrap; }
@@ -553,7 +553,7 @@
   .savings-cost { color: #fca5a5; }
   .savings-saved { color: #4ade80; font-size: 16px; font-weight: 700; }
   .savings-highlight { padding: 6px 12px; background: rgba(74,222,128,0.08); border-radius: 6px; }
- 
+
   .pdf-modal-overlay {
     position: fixed;
     inset: 0;
@@ -631,7 +631,7 @@
 </style>
 </head>
 <body>
- 
+
 <div class="container">
   <header>
     <div class="eyebrow">Commission Intelligence</div>
@@ -644,14 +644,14 @@
       <div class="source-tag">AI Analysis</div>
     </div>
   </header>
- 
+
   <div class="tier-legend">
     <div class="tier-badge t0"><div class="dot"></div> Tier 0 — $10,000 &nbsp;·&nbsp; 12–14 pts</div>
     <div class="tier-badge t1"><div class="dot"></div> Tier 1 — $5,000 &nbsp;·&nbsp; 9–11 pts</div>
     <div class="tier-badge t2"><div class="dot"></div> Tier 2 — $2,500 &nbsp;·&nbsp; 5–8 pts</div>
     <div class="tier-badge t3"><div class="dot"></div> Tier 3 — No Commission &nbsp;·&nbsp; 1–4 pts</div>
   </div>
- 
+
   <div class="search-section">
     <div class="search-row">
       <input type="text" class="search-input" id="nameInput" placeholder="Enter speaker name (e.g. Malcolm Gladwell)" />
@@ -670,7 +670,7 @@
     </div>
     <div class="progress-info" id="progressInfo"></div>
   </div>
- 
+
   <div id="resultsArea">
     <div class="empty-state">
       <div class="icon">◈</div>
@@ -678,7 +678,7 @@
     </div>
   </div>
 </div>
- 
+
 <div class="pdf-modal-overlay" id="pdfModal">
   <div class="pdf-modal">
     <h3>Download PDF Report</h3>
@@ -693,7 +693,7 @@
     </div>
   </div>
 </div>
- 
+
 <div class="modal-overlay" id="batchModal">
   <div class="modal">
     <h3>Batch Score Speakers</h3>
@@ -705,12 +705,12 @@
     </div>
   </div>
 </div>
- 
+
 <script>
- 
+
 const BOOK_PURCHASE_DATA = {
   // Market fees sourced from speaker bureau sites (AllAmericanSpeakers, BigSpeak, GothamArtists, etc.)
-  "Arnold Schwarzenegger":    { bookCost: 21325,      marketFee: 500000 },  // $500K+
+  "Arnold Schwarzenegger":    { bookCost: 21325,      marketFee: 300000 },  // $300K (thoughtco.com)
   "Adam Grant":               { bookCost: 12795,      marketFee: 200000 },  // $150K-$200K
   "Emily Balcetis":           { bookCost: 6500,       marketFee: 50000  },  // ~$50K
   "Tamron Hall":              { bookCost: 10662.50,   marketFee: 125000 },  // $100K-$125K (Gotham Artists)
@@ -720,25 +720,25 @@ const BOOK_PURCHASE_DATA = {
   "Frank Caprio":             { bookCost: 10775.79,   marketFee: 50000  },  // ~$50K
   "Judge Frank Caprio":       { bookCost: 10775.79,   marketFee: 50000  },
   "Malcolm Gladwell":         { bookCost: 12795,      marketFee: 200000 },  // $150K-$200K
-  "Matthew McConaughey":      { bookCost: 31907.66,   marketFee: 500000 },  // $500K+
+  "Matthew McConaughey":      { bookCost: 31907.66,   marketFee: 300000 },  // $500K+
   "Jonah Berger":             { bookCost: 10662.50,   marketFee: 100000 },  // ~$100K
-  "Lindsey Vonn":             { bookCost: 8530,       marketFee: 300000 },  // $200K-$300K (Gotham Artists)
+  "Lindsey Vonn":             { bookCost: 8530,       marketFee: 200000 },  // $200K-$300K (Gotham Artists)
   "Terry Crews":              { bookCost: 13514.75,   marketFee: 125000 },  // $100K-$125K (Gotham Artists)
-  "Robin Roberts":            { bookCost: 15354,      marketFee: 200000 },  // ~$200K
+  "Robin Roberts":            { bookCost: 15354,      marketFee: 125000 },  // ~$200K
   "Andrew Yang":              { bookCost: 7597.03,    marketFee: 75000  },  // ~$75K
   "Kelly Ripa":               { bookCost: 11195.63,   marketFee: 200000 },  // ~$200K (long-running national host)
   "Kevin Hart":               { bookCost: 19192.50,   marketFee: 500000 },  // $500K+
   "Erica Dhawan":             { bookCost: 5149,       marketFee: 75000  },  // ~$75K
   "Bill Gates":               { bookCost: 76770,      marketFee: 500000 },  // $500K+
-  "President George W. Bush": { bookCost: 53312.50,   marketFee: 500000 },  // $500K+
-  "George W. Bush":           { bookCost: 53312.50,   marketFee: 500000 },
+  "President George W. Bush": { bookCost: 53312.50,   marketFee: 175000 },  // $500K+
+  "George W. Bush":           { bookCost: 53312.50,   marketFee: 175000 },
   "President Barack Obama":   { bookCost: 119366.79,  marketFee: 500000 },  // $500K+
   "Barack Obama":             { bookCost: 119366.79,  marketFee: 500000 },
   "Gabrielle Union":          { bookCost: 14927.50,   marketFee: 150000 },  // ~$150K
   "Jamie Foxx":               { bookCost: 21751.51,   marketFee: 300000 },  // ~$300K
   "Rachael Ray":              { bookCost: 11942,      marketFee: 100000 },  // ~$100K
-  "President Bill Clinton":   { bookCost: 50000,      marketFee: 500000 },  // $500K+
-  "Bill Clinton":             { bookCost: 50000,      marketFee: 500000 },
+  "President Bill Clinton":   { bookCost: 50000,      marketFee: 300000 },  // $500K+
+  "Bill Clinton":             { bookCost: 50000,      marketFee: 300000 },
   "Neil Patrick Harris":      { bookCost: 12681,      marketFee: 150000 },  // ~$150K
   "Tanya Acker":              { bookCost: 6297,       marketFee: 50000  },  // ~$50K
   "Bill Nye":                 { bookCost: 10000,      marketFee: 75000  },  // ~$75K
@@ -747,7 +747,7 @@ const BOOK_PURCHASE_DATA = {
   "Hoda Kotb":                { bookCost: 14394,      marketFee: 200000 },  // ~$200K
   "Sebastian Maniscalco":     { bookCost: 10000,      marketFee: 300000 }   // ~$300K
 };
- 
+
 function getBookData(name) {
   if (BOOK_PURCHASE_DATA[name]) return BOOK_PURCHASE_DATA[name];
   const lower = name.toLowerCase();
@@ -757,20 +757,20 @@ function getBookData(name) {
   }
   return null;
 }
- 
+
 function formatMoney(n) {
   if (n >= 500000) return '$500,000+';
   return '$' + n.toLocaleString();
 }
- 
+
 // ============================================================
 // Backend Worker URL — update this if you ever recreate the Worker
 const WORKER_URL = 'https://speaker-rankings-tool.dlasker.workers.dev';
 // ============================================================
- 
+
 let results = [];
 let isRunning = false;
- 
+
 async function fetchWikipediaPageViews(title) {
   const encodedTitle = encodeURIComponent(title.replace(/ /g, '_'));
   const today = new Date();
@@ -797,7 +797,7 @@ async function fetchWikipediaPageViews(title) {
     return { annualViews, avgMonthly };
   } catch(e) { return null; }
 }
- 
+
 async function fetchWikipediaData(name) {
   try {
     // Strategy 1: Search API — try top 3 results
@@ -805,24 +805,24 @@ async function fetchWikipediaData(name) {
     const searchRes = await fetch(searchUrl);
     const searchData = await searchRes.json();
     const candidates = searchData.query?.search || [];
- 
+
     for (const candidate of candidates) {
       const views = await fetchWikipediaPageViews(candidate.title);
       if (views) return { title: candidate.title, ...views, hasPage: true };
     }
- 
+
     // Strategy 2: Direct URL — construct from name
     const directTitle = name.trim().replace(/\s+/g, '_');
     const directViews = await fetchWikipediaPageViews(directTitle);
     if (directViews) return { title: name.trim(), ...directViews, hasPage: true };
- 
+
     // Strategy 3: Strip common prefixes (President, Dr., Sir, Judge, etc.)
     const stripped = name.replace(/^(President|Dr\.|Sir|Judge|His Holiness the|The)\s+/i, '').trim();
     if (stripped !== name) {
       const strippedViews = await fetchWikipediaPageViews(stripped.replace(/\s+/g, '_'));
       if (strippedViews) return { title: stripped, ...strippedViews, hasPage: true };
     }
- 
+
     // Found in search but no view data
     if (candidates.length > 0) return { title: candidates[0].title, annualViews: null, hasPage: true };
     return null;
@@ -830,7 +830,7 @@ async function fetchWikipediaData(name) {
     return null;
   }
 }
- 
+
 async function researchWithWebSearch(name, wikiData, trendsData) {
   const annualSummary = wikiData?.annualViews?.map(y => `${y.year}: ${y.views.toLocaleString()}`).join(', ') || 'unavailable';
   const wikiContext = wikiData
@@ -839,15 +839,15 @@ async function researchWithWebSearch(name, wikiData, trendsData) {
   const trendsContext = trendsData
     ? `Google Trends data available for scoring (relative search interest 0-100 scale, US, last 5 years). Use web search to find their current Google Trends interest score.`
     : `Google Trends data unavailable — rely on web search for search interest signals.`;
- 
+
   const prompt = `You are a professional speaker booking analyst. Research this public figure and score them on our commission rubric.
- 
+
 SPEAKER: "${name}"
- 
+
 LIVE DATA GATHERED:
 ${wikiContext}
 ${trendsContext}
- 
+
 Search the web for current information on:
 - Social media: Run a SEPARATE search for EACH platform below. Do not combine into one search.
   Search 1: "[name] Instagram followers"
@@ -862,7 +862,7 @@ Search the web for current information on:
 - Major awards, nominations, or NYT/WSJ bestseller list status
 - Their career achievements, legacy, and cultural impact
 - Their Google Trends search interest score (search "Google Trends [name]" to find relative interest)
- 
+
 For MAINSTREAM CULTURAL FOOTPRINT — search specifically based on their category:
 - TV/NEWS: Show name, network (ABC/NBC/CBS/CNN/Fox/Bravo/etc.), seasons, ratings, streaming platform (Netflix/Hulu/HBO/Amazon)
 - FILM: Box office gross (search Box Office Mojo), number of major releases, franchise involvement (Marvel, DC, etc.)
@@ -872,9 +872,9 @@ For MAINSTREAM CULTURAL FOOTPRINT — search specifically based on their categor
 - MUSIC: Billboard chart performance, Grammy nominations/wins, concert tour gross (search Pollstar/Billboard Boxscore), streaming numbers
 - POLITICS/PUBLIC OFFICE: Office held, election results, historical significance, major legislation or rulings
 - BUSINESS/ENTREPRENEURSHIP: Company valuation, revenue, Forbes ranking, industry disruption
- 
+
 SCORING RUBRIC — score each 0, 1, 2, or 3:
- 
+
 CRITERION 1 — PUBLIC PROFILE
 This score is a composite of THREE signals — weight all equally:
   A) Wikipedia annual views: Under 120K=low, 120K–1.2M=moderate, 1.2M–6M=high, 6M+=iconic
@@ -893,57 +893,57 @@ This score is a composite of THREE signals — weight all equally:
          • Business: Forbes-ranked, $1B+ company, nationally covered disruption
        ICONIC = Defines their category at a generational level — Super Bowl, Oscar franchise,
                 sold-out stadiums, #1 podcast, defining political figure, etc.
- 
+
 Score based on the OVERALL PICTURE across all three signals. Do NOT let one weak signal override two strong ones.
 IMPORTANT: Meeting the HIGH bar in Signal C alone = minimum score of 2, regardless of Wikipedia or Trends numbers.
- 
+
 USE THESE NAMED ANCHORS to calibrate your score — compare the speaker to these known figures:
   Score 0 = No meaningful public presence outside their niche
   Score 1 = Jonah Berger, Erica Dhawan, Rohit Bhargava, Charlene Li — known within an industry, limited mainstream recognition
   Score 2 = Adam Grant, Malcolm Gladwell, Simon Sinek, Brené Brown, Hoda Kotb, Robin Roberts, Daymond John, Ryan Serhant, Sebastian Maniscalco — nationally recognized, strong mainstream presence
   Score 3 = Oprah Winfrey, Barack Obama, Tiger Woods, Kevin Hart, Arnold Schwarzenegger, Sylvester Stallone, Matthew McConaughey — generational/global icons
- 
+
 Match the speaker to the closest anchor and assign that score. Do not deviate more than 1 point from the closest comparable.
- 
+
 CRITERION 2 — SOCIAL MEDIA FOLLOWING:
 DO NOT SCORE THIS. Set socialMedia to 0. Report raw follower counts per platform in dataPoints (instagram, twitter, tiktok, facebook, threads, linkedin). We calculate this score automatically.
- 
+
 CRITERION 3 — OPEN MARKET APPEARANCE FEE:
 Search "[name] speaking fee", "[name] keynote fee", "[name] appearance fee" on speaker bureau sites (AllAmericanSpeakers, BigSpeak, KeynoteSpeakers, etc.) and news articles.
 IMPORTANT: Use the TOP of any reported range. If you find a range like $100K–$200K, score it as $200K (score 2).
 IMPORTANT: If no fee data is found, infer from the named anchors below — never default to 0 for a recognizable figure.
 IMPORTANT: If a speaker scores 3 on Public Profile, their fee is also 3.
- 
+
 USE THESE NAMED ANCHORS to calibrate your score:
   Score 1 ($50K–$150K) = Jonah Berger, Erica Dhawan, Rohit Bhargava, Ryan Serhant
   Score 2 ($150K–$500K) = Adam Grant, Malcolm Gladwell, Simon Sinek, Brené Brown, Sebastian Maniscalco
   Score 3 ($500K+) = Oprah Winfrey, Barack Obama, Tiger Woods, Kevin Hart, Arnold Schwarzenegger, Sylvester Stallone, Matthew McConaughey
- 
+
 Match the speaker to the closest anchor and assign that score. Do not deviate more than 1 point from the closest comparable.
 0 = Under $50K market rate
 1 = $50K–$150K market rate
 2 = $150K–$500K market rate
 3 = $500K+ market rate, OR essentially unbookable without extraordinary personal access
- 
+
 CRITERION 4 — ACCOLADES & RECOGNITION (major awards + NYT/WSJ bestseller):
 0 = No major awards or bestseller status
 1 = Notable industry awards or peer recognition
 2 = Major award winner or nominee (Oscar, Grammy, Emmy, Tony, Hall of Fame, Olympic medal, Nobel, etc.) OR NYT/WSJ bestseller
 3 = Both major awards AND bestseller, OR multiple major awards across categories
- 
- 
+
+
 TIER THRESHOLDS (AI scores 4 criteria, max 12 pts; Booking Complexity 0-2 added manually by user, total max 14):
 11–12 base = Tier 0 | 8–10 base = Tier 1 | 4–7 base = Tier 2 | 1–3 = Tier 3
- 
+
 TIER 0 OVERRIDE: Figures of unique historic, cultural, or spiritual significance (e.g. a sitting/former world leader,
 Nobel Peace Prize laureate, Dalai Lama, Pope) may qualify for Tier 0 regardless of social media score.
 Flag these cases explicitly so the team can discuss.
- 
+
 TIER 0 OVERRIDE — set tier0Override: true if the speaker holds or held ANY of:
 - Sitting or former Pope, US President, Dalai Lama, UN Secretary-General
 - Head of state of a G7 nation, Nobel Peace Prize laureate, Archbishop of Canterbury
 If any apply, set tier0Override: true. Do not second-guess this list.
- 
+
 CRITERION 4 — ACCOLADES:
 DO NOT SCORE. Set accolades to 0. Report these facts in dataPoints:
   hasAwardWin: true/false (Grammy/Emmy/Oscar/Tony/HOF/Olympic medal/Nobel/Peabody win)
@@ -953,10 +953,10 @@ DO NOT SCORE. Set accolades to 0. Report these facts in dataPoints:
   hasTED: true/false (TED main stage)
   hasMajorPublisher: true/false (Penguin/HarperCollins/Simon & Schuster/Random House/Hachette/Macmillan)
   hasMultipleMajorAwards: true/false (won 3+ major championships, titles, or awards in their field — e.g. multiple Olympic gold medals, multiple Grand Slams, multiple Masters titles, multiple Super Bowl MVPs, multiple Oscars, etc.)
- 
+
 APPEARANCE FEE RULE: Use the TOP of any reported range to determine score. Never default to 0 for a well-known figure with no fee data — infer from peers.
 PUBLIC PROFILE RULE: HIGH in Signal C alone = minimum score of 2. Missing Wikipedia/Trends data never justifies low score for globally recognized figures. National morning show co-host/anchor = minimum score of 2.
- 
+
 Respond ONLY with valid JSON — no markdown, no extra text:
 {
   "name": "Full Name",
@@ -991,7 +991,7 @@ Respond ONLY with valid JSON — no markdown, no extra text:
   "tier0OverrideNote": "",
   "reasoning": "2-3 sentences citing specific facts from your searches."
 }`;
- 
+
   let response;
   try {
     response = await fetch(WORKER_URL, {
@@ -1007,7 +1007,7 @@ Respond ONLY with valid JSON — no markdown, no extra text:
   } catch(fetchErr) {
     throw new Error('Network error — please check your connection and try again.');
   }
- 
+
   if (response.status === 429) {
     throw new Error('Rate limit reached — please wait 30 seconds and try again.');
   }
@@ -1015,13 +1015,13 @@ Respond ONLY with valid JSON — no markdown, no extra text:
     const errText = await response.text().catch(() => '');
     throw new Error(`API error ${response.status}: ${errText.slice(0,200)}`);
   }
- 
+
   const data = await response.json();
   const textBlocks = data.content.filter(b => b.type === "text").map(b => b.text).join("");
   const jsonMatch = textBlocks.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error("Could not parse AI response");
   const result = JSON.parse(jsonMatch[0]);
- 
+
   // Inject live wiki data
   if (wikiData?.annualViews) {
     result.dataPoints = result.dataPoints || {};
@@ -1029,7 +1029,7 @@ Respond ONLY with valid JSON — no markdown, no extra text:
     result.dataPoints.wikiTitle = wikiData.title;
     result.liveWiki = true;
   }
- 
+
   // Inject live trends data
   if (trendsData?.averageInterest !== null && trendsData?.averageInterest !== undefined) {
     result.dataPoints = result.dataPoints || {};
@@ -1037,7 +1037,7 @@ Respond ONLY with valid JSON — no markdown, no extra text:
     result.dataPoints.trendsPeak = trendsData.peakInterest;
     result.liveTrends = true;
   }
- 
+
   // Compute social media score from raw platform numbers (math only, no AI judgment)
   const dp = result.dataPoints || {};
   const totalFollowers = (dp.instagram||0)+(dp.twitter||0)+(dp.tiktok||0)+(dp.facebook||0)+(dp.threads||0)+(dp.linkedin||0);
@@ -1051,7 +1051,7 @@ Respond ONLY with valid JSON — no markdown, no extra text:
       ? (totalFollowers/1000000).toFixed(1)+'M combined'
       : Math.round(totalFollowers/1000)+'K combined'
     : result.dataPoints.estimatedSocialFollowing || 'unavailable';
- 
+
   // Compute accolades score from boolean facts (math only, no AI judgment)
   const awardWin = dp.hasAwardWin == true;
   const awardNom = dp.hasAwardNomination == true;
@@ -1065,7 +1065,7 @@ Respond ONLY with valid JSON — no markdown, no extra text:
   else if (awardWin || bestseller) result.scores.accolades = 2;
   else if (hasAny) result.scores.accolades = 1;
   else result.scores.accolades = 0;
- 
+
   // Apply Tier 0 Override — lock scores for heads of state
   if (result.tier0Override) {
     result.scores.publicProfile = 3;
@@ -1083,11 +1083,11 @@ Respond ONLY with valid JSON — no markdown, no extra text:
   }
   const commissions = ['$10,000','$5,000','$2,500','No Commission'];
   result.commission = commissions[result.tier];
- 
- 
+
+
   return result;
 }
- 
+
 async function fetchGoogleTrends(name) {
   try {
     // Google Trends CSV endpoint — no API key required
@@ -1105,7 +1105,7 @@ async function fetchGoogleTrends(name) {
     return { token: timelineWidget.token, request: timelineWidget.request };
   } catch(e) { return null; }
 }
- 
+
 async function scoreSpeaker(name, updateSteps) {
   updateSteps && updateSteps(1);
   const [wikiData, trendsData] = await Promise.all([
@@ -1117,7 +1117,7 @@ async function scoreSpeaker(name, updateSteps) {
   updateSteps && updateSteps(3);
   return result;
 }
- 
+
 function setStep(stepNum) {
   for (let i = 1; i <= 3; i++) {
     const el = document.getElementById(`step${i}`);
@@ -1127,7 +1127,7 @@ function setStep(stepNum) {
     else { el.className = 'status-step'; icon.textContent = '○'; }
   }
 }
- 
+
 function resetSteps() {
   for (let i = 1; i <= 3; i++) {
     const el = document.getElementById(`step${i}`);
@@ -1135,7 +1135,7 @@ function resetSteps() {
     el.querySelector('.step-icon').textContent = '○';
   }
 }
- 
+
 function tierColor(tier) { return ['tier-0','tier-1','tier-2','tier-3'][tier] || 'tier-3'; }
 function tierPillClass(tier) { return ['t0','t1','t2','t3'][tier] || 't3'; }
 function scoreColor(score) {
@@ -1150,13 +1150,13 @@ function formatNum(n) {
   if (n >= 1000) return (n/1000).toFixed(0) + 'K';
   return n.toLocaleString();
 }
- 
+
 function renderCard(data) {
   const tc = tierColor(data.tier);
   const tp = tierPillClass(data.tier);
   const labels = ['Public Profile','Social Media','Open Market Appearance Fee','Accolades'];
   const keys = ['publicProfile','socialMedia','appearanceFee','accolades'];
- 
+
   const scoreRows = keys.map((k, i) => {
     const val = data.scores[k];
     const pct = (val / 3) * 100;
@@ -1171,16 +1171,16 @@ function renderCard(data) {
         </div>
       </div>`;
   }).join('');
- 
+
   const totalColor = ['var(--tier0)','var(--tier1)','var(--tier2)','var(--tier3)'][data.tier] || 'var(--tier3)';
   const isBubble = data.bubbleReview;
   const isOverride = data.tier0Override;
- 
+
   const dp = data.dataPoints || {};
   const annualRows = dp.annualViews?.map(y =>
     `<div class="wiki-stat"><div class="wlabel">${y.year} Views</div><div class="wval">${formatNum(y.views)}</div></div>`
   ).join('') || '';
- 
+
   const wikiBlock = (dp.annualViews || dp.totalSocialFollowers > 0 || dp.trendsAvg !== undefined) ? `
     <div class="wiki-data">
       ${dp.wikiTitle ? `<div class="wiki-stat"><div class="wlabel">Wikipedia</div><div class="wval">${dp.wikiTitle}</div></div>` : ''}
@@ -1203,7 +1203,7 @@ function renderCard(data) {
       ${dp.estimatedFee ? `<div class="wiki-stat"><div class="wlabel">Est. Appearance Fee</div><div class="wval">${dp.estimatedFee}</div></div>` : ''}
       ${dp.notableAwards ? `<div class="wiki-stat"><div class="wlabel">Accolades</div><div class="wval">${dp.notableAwards}</div></div>` : ''}
     </div>` : '';
- 
+
   return `
     <div class="speaker-card ${tc}">
       <div class="card-header">
@@ -1258,7 +1258,7 @@ function renderCard(data) {
       ${wikiBlock}
     </div>`;
 }
- 
+
 function setComplexityByIdx(idx, value) {
   if (idx === -1 || idx >= results.length) return;
   results[idx].bookingComplexity = value;
@@ -1279,24 +1279,24 @@ function setComplexityByIdx(idx, value) {
   r.commission = commissions[r.tier];
   renderResults();
 }
- 
+
 function openPdfModal() {
   document.getElementById('pdfBookingDate').value = '';
   document.getElementById('pdfNote').value = '';
   document.getElementById('pdfModal').classList.add('active');
 }
- 
+
 function closePdfModal() {
   document.getElementById('pdfModal').classList.remove('active');
 }
- 
+
 function generateAndDownloadPDF() {
   const bookingDate = document.getElementById('pdfBookingDate').value;
   const note = document.getElementById('pdfNote').value.trim();
   closePdfModal();
   downloadPDF(bookingDate, note);
 }
- 
+
 function downloadPDF(bookingDateStr, noteStr) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -1309,24 +1309,24 @@ function downloadPDF(bookingDateStr, noteStr) {
   const bookingDateFormatted = bookingDateStr
     ? new Date(bookingDateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : null;
- 
+
   const tierColors = {
     0: [240, 192, 64],
     1: [96, 165, 250],
     2: [167, 139, 250],
     3: [107, 107, 133]
   };
- 
+
   function checkPage(needed) {
     if (y + needed > 282) { doc.addPage(); y = 18; }
   }
- 
+
   // Page title
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
   doc.setTextColor(26, 26, 46);
   doc.text('Speaker Tier Results', margin, y);
- 
+
   // Anchored badge
   if (isAnchored) {
     doc.setFillColor(240, 192, 64);
@@ -1338,7 +1338,7 @@ function downloadPDF(bookingDateStr, noteStr) {
     doc.text('ANCHORED', badgeX + 15, y - 0.5, { align: 'center' });
   }
   y += 6;
- 
+
   // Date line
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
@@ -1354,7 +1354,7 @@ function downloadPDF(bookingDateStr, noteStr) {
     doc.text(`Exploratory Pull — Not Anchored  ·  Pulled: ${pullDate}`, margin, y);
   }
   y += 5;
- 
+
   // Note line
   if (noteStr) {
     doc.setFont('helvetica', 'italic');
@@ -1363,55 +1363,55 @@ function downloadPDF(bookingDateStr, noteStr) {
     doc.text(`Note: ${noteStr}`, margin, y);
     y += 5;
   }
- 
+
   y += 3;
   doc.setDrawColor(200, 200, 210);
   doc.setLineWidth(0.4);
   doc.line(margin, y, pageW - margin, y);
   y += 8;
- 
+
   const scored = results.filter(r => !r.error);
- 
+
   scored.forEach((r) => {
     const tierColor = tierColors[r.tier] || tierColors[3];
     const dp = r.dataPoints || {};
- 
+
     // Estimate card height
     checkPage(20);
- 
+
     // Card background
     doc.setFillColor(19, 19, 26);
     const cardStartY = y;
     doc.roundedRect(margin, y, contentW, 18, 2, 2, 'F');
- 
+
     // Tier stripe
     doc.setFillColor(...tierColor);
     doc.rect(margin, y, 3, 18, 'F');
- 
+
     // Name
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
     doc.setTextColor(232, 232, 240);
     doc.text(r.name, margin + 7, y + 8);
- 
+
     // Tier + Commission
     doc.setFontSize(9);
     doc.setTextColor(...tierColor);
     doc.text(`Tier ${r.tier}  ·  ${r.commission}`, pageW - margin - 5, y + 8, { align: 'right' });
- 
+
     // Total score
     doc.setFontSize(8);
     doc.setTextColor(107, 107, 133);
     const totalStr = `Total: ${r.total}/${r.bookingComplexity !== undefined ? 14 : 12}`;
     doc.text(totalStr, pageW - margin - 5, y + 14, { align: 'right' });
- 
+
     y += 20;
- 
+
     // Scores section
     checkPage(16);
     doc.setFillColor(19, 19, 26);
     doc.rect(margin, y, contentW, 14, 'F');
- 
+
     const criteria = [
       { label: 'Public Profile', val: r.scores.publicProfile, max: 3 },
       { label: 'Social Media', val: r.scores.socialMedia, max: 3 },
@@ -1419,7 +1419,7 @@ function downloadPDF(bookingDateStr, noteStr) {
       { label: 'Accolades', val: r.scores.accolades, max: 3 },
       { label: 'Booking Complexity', val: r.bookingComplexity !== undefined ? r.bookingComplexity : '—', max: 2 },
     ];
- 
+
     const colW = contentW / criteria.length;
     criteria.forEach((cr, ci) => {
       const cx = margin + ci * colW + 3;
@@ -1427,16 +1427,16 @@ function downloadPDF(bookingDateStr, noteStr) {
       doc.setFontSize(6.5);
       doc.setTextColor(107, 107, 133);
       doc.text(cr.label, cx, y + 4);
- 
+
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       const scoreColor = cr.val === 3 ? [240,192,64] : cr.val === 2 ? [96,165,250] : cr.val === 1 ? [167,139,250] : [107,107,133];
       doc.setTextColor(...scoreColor);
       doc.text(`${cr.val}/${cr.max}`, cx, y + 11);
     });
- 
+
     y += 16;
- 
+
     // Reasoning
     if (r.reasoning) {
       checkPage(16);
@@ -1450,7 +1450,7 @@ function downloadPDF(bookingDateStr, noteStr) {
       doc.text(reasonLines, margin + 6, y + 5);
       y += reasonH;
     }
- 
+
     // Data points section
     const dataItems = [];
     if (dp.estimatedFee) dataItems.push(['Est. Appearance Fee', dp.estimatedFee]);
@@ -1471,7 +1471,7 @@ function downloadPDF(bookingDateStr, noteStr) {
         dataItems.push([`Wikipedia ${av.year}`, av.views >= 1000000 ? (av.views/1000000).toFixed(1)+'M views' : Math.round(av.views/1000)+'K views']);
       });
     }
- 
+
     if (dataItems.length > 0) {
       checkPage(dataItems.length * 5 + 6);
       doc.setFillColor(16, 16, 24);
@@ -1489,7 +1489,7 @@ function downloadPDF(bookingDateStr, noteStr) {
       });
       y += 2;
     }
- 
+
     // Savings section
     const bd = getBookData(r.name);
     if (bd && bd.bookCost > 0) {
@@ -1501,12 +1501,12 @@ function downloadPDF(bookingDateStr, noteStr) {
       doc.setDrawColor(74, 222, 128);
       doc.setLineWidth(0.3);
       doc.roundedRect(margin, y, contentW, 20, 2, 2, 'S');
- 
+
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
       doc.setTextColor(74, 222, 128);
       doc.text('BOOK PURCHASE VS. MARKET RATE', margin + 5, y + 5);
- 
+
       const cols = [
         { label: 'Books Paid', val: '$' + bd.bookCost.toLocaleString() },
         { label: 'Market Rate', val: formatMoney(bd.marketFee) },
@@ -1526,10 +1526,10 @@ function downloadPDF(bookingDateStr, noteStr) {
       });
       y += 22;
     }
- 
+
     y += 8;
   });
- 
+
   // Footer
   const totalPages = doc.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
@@ -1540,7 +1540,7 @@ function downloadPDF(bookingDateStr, noteStr) {
     doc.text(`Speaker Commission Tier Tool — Confidential  ·  Rubric v2 (14pt)  ·  Pulled: ${pullDate}`, pageW / 2, 292, { align: 'center' });
     doc.text(`Page ${i} of ${totalPages}`, pageW - margin, 292, { align: 'right' });
   }
- 
+
   doc.save(`speaker-tier-results-${new Date().toISOString().slice(0,10)}.pdf`);
 }
 function renderResults() {
@@ -1555,18 +1555,18 @@ function renderResults() {
     return renderCard(r);
   }).join('');
 }
- 
+
 async function scoreSingle() {
   const input = document.getElementById('nameInput');
   const name = input.value.trim();
   if (!name || isRunning) return;
- 
+
   isRunning = true;
   document.getElementById('scoreBtn').disabled = true;
   document.getElementById('loadingBar').classList.add('active');
   document.getElementById('statusSteps').classList.add('active');
   resetSteps();
- 
+
   try {
     const data = await scoreSpeaker(name, setStep);
     results.unshift(data);
@@ -1578,26 +1578,26 @@ async function scoreSingle() {
     }
     results.unshift({ name, error: errorMsg });
   }
- 
+
   isRunning = false;
   document.getElementById('scoreBtn').disabled = false;
   document.getElementById('loadingBar').classList.remove('active');
   document.getElementById('statusSteps').classList.remove('active');
   renderResults();
 }
- 
+
 async function runBatch() {
   const textarea = document.getElementById('batchInput');
   const names = textarea.value.split('\n').map(n => n.trim()).filter(Boolean);
   if (!names.length) return;
- 
+
   closeBatch();
   isRunning = true;
   document.getElementById('scoreBtn').disabled = true;
   document.getElementById('loadingBar').classList.add('active');
   const progress = document.getElementById('progressInfo');
   progress.classList.add('active');
- 
+
   for (let i = 0; i < names.length; i++) {
     progress.textContent = `Scoring ${i + 1} of ${names.length}: ${names[i]}...`;
     try {
@@ -1609,13 +1609,13 @@ async function runBatch() {
     renderResults();
     if (i < names.length - 1) await new Promise(r => setTimeout(r, 1200));
   }
- 
+
   isRunning = false;
   document.getElementById('scoreBtn').disabled = false;
   document.getElementById('loadingBar').classList.remove('active');
   progress.classList.remove('active');
 }
- 
+
 function openBatch() {
   document.getElementById('batchInput').value = `Adam Grant
 Andrew Yang
@@ -1684,19 +1684,19 @@ Valerie Jarrett
 Wendy Williams`;
   document.getElementById('batchModal').classList.add('active');
 }
- 
+
 function closeBatch() {
   document.getElementById('batchModal').classList.remove('active');
 }
- 
+
 document.getElementById('nameInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') scoreSingle();
 });
- 
+
 document.getElementById('batchModal').addEventListener('click', e => {
   if (e.target === document.getElementById('batchModal')) closeBatch();
 });
- 
+
 document.getElementById('pdfModal').addEventListener('click', e => {
   if (e.target === document.getElementById('pdfModal')) closePdfModal();
 });
