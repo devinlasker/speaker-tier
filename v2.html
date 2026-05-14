@@ -548,6 +548,16 @@
     padding: 10px 14px; border-radius: 0 6px 6px 0; margin-bottom: 12px;
     font-style: italic;
   }
+  .tier-comparison {
+    font-size: 13px; line-height: 1.65; color: #c8d8f0;
+    background: rgba(167,139,250,0.06); border-left: 3px solid var(--tier2);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin-bottom: 12px;
+  }
+  .comparison-label {
+    display: block; font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--tier2);
+    margin-bottom: 4px;
+  }
   .format-row {
     display: flex; align-items: center; gap: 12px;
     padding: 6px 0; margin-bottom: 8px;
@@ -682,16 +692,19 @@ const HARDCODED_SPEAKER_DATA = {
   "Hoda Kotb": {
     bio: "Co-anchor of NBC's Today Show from 2018 to 2025, Hoda Kotb reached an average of 4 million daily viewers. Peabody Award and multiple Emmy winner. NYT bestselling author of 8 books with a combined 4.6M social following.",
     tierBlurb: "Hoda Kotb is one of the most recognizable faces in American morning television — a two-decade network presence with a Peabody Award, eight bestselling books, and the kind of audience trust that money cannot manufacture.",
+    tierComparison: "Hoda Kotb is the direct peer of Robin Roberts — both are long-tenured national morning show anchors with Peabody Awards, bestselling books, and 4M+ daily viewers. Robin Roberts commands $125K on the open market; Hoda's range is identical. Any framework that places Robin Roberts at Tier 1 places Hoda Kotb there too.",
     appearanceFormat: "Book-in-lieu engagement / Virtual keynote"
   },
   "Sebastian Maniscalco": {
     bio: "The #1 ranked touring comedian in North America per Pollstar, Sebastian Maniscalco has recorded seven specials across Netflix, Hulu, and Showtime and holds multiple Madison Square Garden sellout records. Featured in Scorsese's The Irishman and the Oscar-winning Green Book. National bestselling memoir and 6.9M combined social following.",
     tierBlurb: "Sebastian Maniscalco is the highest-grossing touring comedian in America — a Scorsese collaborator, multi-platform streaming headliner, and national bestselling author whose live ticket sales rival Kevin Hart's. The data makes the case.",
+    tierComparison: "Sebastian Maniscalco's touring revenue is neck-and-neck with Kevin Hart's — the same Kevin Hart who is an undisputed Tier 1. Maniscalco has outsold Hart in several markets, commands seven streaming specials across Netflix, Hulu, and Showtime, and has appeared in two major Hollywood films. He is not adjacent to Tier 1. He is Tier 1.",
     appearanceFormat: "Book-in-lieu engagement / Live keynote"
   },
   "Ryan Serhant": {
     bio: "Star of Bravo's Million Dollar Listing NY (9+ seasons) and Netflix's Owning Manhattan. Founder of SERHANT. brokerage — $6B+ in annual sales across 700+ agents and 8 states. Three-time national bestselling author including WSJ-ranked Sell It Like Serhant. 5.1M combined social following.",
     tierBlurb: "Ryan Serhant built one of the fastest-growing real estate brokerages in the country, has 5M+ social followers, and commands a national audience that spans two streaming platforms. His fee reflects his market floor — not his ceiling.",
+    tierComparison: "Ryan Serhant sits at the intersection of Simon Sinek and Mark Cuban — a bestselling author with a national business platform, 5M+ social following, and two streaming series. Where Sinek built an audience through ideas and Cuban through deals, Serhant has done both. His presence on Bravo and Netflix puts him in front of the same mainstream audience that defines Tier 1.",
     appearanceFormat: "Book-in-lieu engagement / Virtual keynote"
   }
 };
@@ -909,8 +922,42 @@ APPEARANCE FEE RULE: Use the TOP of any reported range to determine score. Never
 PUBLIC PROFILE RULE: HIGH in Signal C alone = minimum score of 2. Missing Wikipedia/Trends data never justifies low score for globally recognized figures. National morning show co-host/anchor = minimum score of 2.
 
 For the bio field: write a punchy 2-3 sentence speaker bureau-style bio using specific facts from your research. Credentials, career highlights, reach.
+
 For the tierBlurb field: write the strongest possible 1-2 sentence case for why this speaker is nationally significant. Be direct and adversarial — argue the case. Use specific verifiable facts.
+
 For the appearanceFormat field: based on what you know about how NSLS engages speakers via book purchases, infer the likely format (Virtual keynote, Live keynote, Book-in-lieu engagement, etc.).
+
+For the tierComparison field: compare this speaker explicitly to the anchor lists below. Name the closest comparable(s) and explain why. Be specific — reference career achievements, audience size, cultural footprint. Write 2-3 sentences making the strongest possible case for their tier placement.
+
+TIER ANCHOR LISTS — use these as calibration benchmarks:
+
+TIER 1 ANCHORS (nationally recognized, $100K+ market rate):
+- Kevin Hart — highest-grossing touring comedian, global film career, 150M+ social
+- Oprah Winfrey — generational media icon, network founder, cultural institution
+- Arnold Schwarzenegger — Hollywood franchise star, former Governor of California
+- Matthew McConaughey — Oscar-winning actor, $300K+ speaker, national cultural figure
+- Sylvester Stallone — iconic film franchise star, multi-decade mainstream presence
+- Kevin Bacon — Six Degrees pop culture institution, multi-decade film/TV career
+- Andy Cohen — Bravo network executive and host, Watch What Happens Live, national media figure
+- Hoda Kotb — Today Show co-anchor 2018-2025, Peabody Award, 8 NYT bestsellers
+- Robin Roberts — Good Morning America anchor, Peabody Award, national household name
+- Sebastian Maniscalco — #1 Pollstar touring comedian, 7 Netflix/Hulu/Showtime specials, MSG sellouts
+- Malcolm Gladwell — NYT bestselling author of 7 books, $350K speaker fee, global thought leader
+- Adam Grant — Wharton professor, #1 NYT bestselling author, TED speaker, organizational psychologist
+- Brené Brown — #1 NYT bestselling author, most-watched TED talk, Netflix special
+- Simon Sinek — TED talk with 60M+ views, 5 bestselling books, $150K+ speaker
+- Mark Cuban — Shark Tank star, billionaire entrepreneur, Dallas Mavericks owner
+- Lindsey Vonn — Most decorated female alpine skier in history, Olympic gold medalist, ESPN icon
+
+TIER 2 ANCHORS (sector-recognized, $40K-$100K market rate):
+- Dr. Drew — Media physician, nationally known but niche medical/celebrity focus
+- Tiki Barber — NFL career, sports media, regional/sports niche recognition
+- Steve Madden — Shoe designer, business figure, limited mainstream cultural footprint
+
+TIER 3 ANCHORS (emerging/niche, under $40K market rate):
+- Jonah Berger — Marketing professor, niche business author
+- Erica Dhawan — Business consultant, limited mainstream recognition
+- Rohit Bhargava — Marketing author, industry-specific recognition
 
 Respond ONLY with valid JSON — no markdown, no extra text:
 {
@@ -942,6 +989,7 @@ Respond ONLY with valid JSON — no markdown, no extra text:
   "bubbleNote": "",
   "bio": "Punchy 2-3 sentence speaker bureau-style bio using specific verified facts.",
   "tierBlurb": "1-2 sentence adversarial argument for why this speaker belongs at this tier. Direct, confident, fact-based.",
+  "tierComparison": "2-3 sentence comparison to the named Tier 1 anchors. Name specific comparable speakers and explain why this speaker belongs at the same level.",
   "appearanceFormat": "Virtual keynote / Live keynote / Book-in-lieu engagement / Panel appearance",
   "scorecard": {
     "category": "Primary category (TV Host, Comedian, Athlete, Author, Politician, Business, etc.)",
@@ -1050,6 +1098,17 @@ Respond ONLY with valid JSON — no markdown, no extra text:
     result.bio = hardcoded.bio;
     result.tierBlurb = hardcoded.tierBlurb;
     result.appearanceFormat = hardcoded.appearanceFormat;
+  }
+
+  // Always override estimatedFee with our verified market rate data
+  const bookData = getBookData(result.name);
+  if (bookData) {
+    result.dataPoints.estimatedFee = formatMoney(bookData.marketFee);
+    // Also override in scorecard notableFact fee reference if present
+    if (result.scorecard) {
+      // Clear any AI-generated fee from scorecard — we show it separately
+      result.scorecard.estimatedFee = formatMoney(bookData.marketFee);
+    }
   }
 
 
@@ -1168,7 +1227,11 @@ function renderCard(data) {
       ${dp.hasForbesList ? `<div class="wiki-stat"><div class="wlabel">Forbes/Time List</div><div class="wval">✓ Yes</div></div>` : ''}
       ${dp.hasTED ? `<div class="wiki-stat"><div class="wlabel">TED Main Stage</div><div class="wval">✓ Yes</div></div>` : ''}
       ${dp.trendsAvg !== undefined ? `<div class="wiki-stat"><div class="wlabel">Google Trends Avg</div><div class="wval">${dp.trendsAvg}/100</div></div>` : ''}
-      ${dp.estimatedFee ? `<div class="wiki-stat"><div class="wlabel">Est. Appearance Fee</div><div class="wval">${dp.estimatedFee}</div></div>` : ''}
+      ${(() => {
+        const vf = getBookData(data.name);
+        const feeToShow = vf ? formatMoney(vf.marketFee) : dp.estimatedFee;
+        return feeToShow ? `<div class="wiki-stat"><div class="wlabel">Est. Market Fee</div><div class="wval">${feeToShow}</div></div>` : '';
+      })()}
       ${dp.notableAwards ? `<div class="wiki-stat"><div class="wlabel">Accolades</div><div class="wval">${dp.notableAwards}</div></div>` : ''}
     </div>` : '';
 
@@ -1210,9 +1273,11 @@ function renderCard(data) {
       </div>
       ${data.bio ? `<div class="bio-block">${data.bio}</div>` : ''}
       ${data.tierBlurb ? `<div class="tier-blurb">${data.tierBlurb}</div>` : ''}
+      ${data.tierComparison ? `<div class="tier-comparison"><span class="comparison-label">Tier Comparison</span>${data.tierComparison}</div>` : ''}
       ${data.appearanceFormat ? `<div class="format-row"><span class="format-label">Format</span><span class="format-val">${data.appearanceFormat}</span></div>` : ''}
       ${(() => {
         const sc = data.scorecard || {};
+        const verifiedFee = getBookData(data.name);
         const rows = [
           ['Category', sc.category],
           ['TV / Show', sc.tvShow],
@@ -1227,6 +1292,7 @@ function renderCard(data) {
           ['Bestseller', sc.bestsellerDetails],
           ['Awards', sc.awardDetails],
           ['Notable Fact', sc.notableFact],
+          ['Est. Market Fee', verifiedFee ? formatMoney(verifiedFee.marketFee) : null],
         ].filter(([k, v]) => v && v.trim() !== '' && v !== 'N/A' && v !== 'None' && v !== 'n/a');
         if (!rows.length) return '';
         return `<div class="scorecard-section">${rows.map(([k, v]) => `<div class="scorecard-row"><span class="scorecard-key">${k}</span><span class="scorecard-val">${v}</span></div>`).join('')}</div>`;
@@ -1344,6 +1410,26 @@ function downloadPDF(bookingDateStr, noteStr) {
       y += blurbH + 4;
     }
 
+    // Tier comparison
+    if (r.tierComparison) {
+      checkPage(18);
+      doc.setFillColor(20, 15, 35);
+      const compLines = doc.splitTextToSize(r.tierComparison, contentW - 16);
+      const compH = compLines.length * 4.5 + 8;
+      doc.rect(margin, y, contentW, compH, 'F');
+      doc.setFillColor(167, 139, 250);
+      doc.rect(margin, y, 2.5, compH, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(167, 139, 250);
+      doc.text('TIER COMPARISON', margin + 7, y + 4);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(180, 170, 220);
+      doc.text(compLines, margin + 7, y + 9);
+      y += compH + 4;
+    }
+
     // Format
     if (r.appearanceFormat) {
       checkPage(8);
@@ -1444,6 +1530,7 @@ function downloadPDF(bookingDateStr, noteStr) {
 
     // Scorecard section
     const sc = r.scorecard || {};
+    const verifiedFeeForPdf = getBookData(r.name);
     const scRows = [
       ['Category', sc.category],
       ['TV / Show', sc.tvShow],
@@ -1458,6 +1545,7 @@ function downloadPDF(bookingDateStr, noteStr) {
       ['Bestseller', sc.bestsellerDetails],
       ['Awards', sc.awardDetails],
       ['Notable Fact', sc.notableFact],
+      ['Est. Market Fee', verifiedFeeForPdf ? formatMoney(verifiedFeeForPdf.marketFee) : null],
     ].filter(([k, v]) => v && v.trim() !== '' && v !== 'N/A' && v !== 'None');
 
     if (scRows.length > 0) {
