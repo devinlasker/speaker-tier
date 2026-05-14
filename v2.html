@@ -1320,20 +1320,6 @@ function renderCard(data) {
         if (!rows.length) return '';
         return `<div class="scorecard-section">${rows.map(([k, v]) => `<div class="scorecard-row"><span class="scorecard-key">${k}</span><span class="scorecard-val">${v}</span></div>`).join('')}</div>`;
       })()}
-      ${(() => {
-        const bd = getBookData(data.name);
-        if (!bd || bd.bookCost === 0) return '';
-        const savings = bd.marketFee - bd.bookCost;
-        const savingsPct = Math.round((savings / bd.marketFee) * 100);
-        return `<div class="savings-row">
-          <div class="savings-title">📚 Book Purchase vs. Market Rate</div>
-          <div class="savings-grid">
-            <div class="savings-item"><div class="savings-label">Books Paid</div><div class="savings-val savings-cost">$${bd.bookCost.toLocaleString()}</div></div>
-            <div class="savings-item"><div class="savings-label">Market Rate</div><div class="savings-val">${formatMoney(bd.marketFee)}</div></div>
-            <div class="savings-item savings-highlight"><div class="savings-label">Estimated Savings</div><div class="savings-val savings-saved">$${savings.toLocaleString()} (${savingsPct}%)</div></div>
-          </div>
-        </div>`;
-      })()}
       ${wikiBlock}
     </div>`;
 }
