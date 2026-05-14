@@ -1297,7 +1297,12 @@ function renderCard(data) {
           ['Awards', sc.awardDetails],
           ['Notable Fact', sc.notableFact],
           ['Est. Market Fee', verifiedFee ? formatMoney(verifiedFee.marketFee) : null],
-        ].filter(([k, v]) => v && v.trim() !== '' && v !== 'N/A' && v !== 'None' && v !== 'n/a');
+        ].filter(([k, v]) => {
+      if (!v || v.trim() === '') return false;
+      const lower = v.trim().toLowerCase();
+      if (lower.startsWith('not applicable') || lower.startsWith('n/a') || lower === 'none' || lower === 'no' || lower === 'na') return false;
+      return true;
+    });
         if (!rows.length) return '';
         return `<div class="scorecard-section">${rows.map(([k, v]) => `<div class="scorecard-row"><span class="scorecard-key">${k}</span><span class="scorecard-val">${v}</span></div>`).join('')}</div>`;
       })()}
@@ -1373,14 +1378,13 @@ function downloadPDF(bookingDateStr, noteStr) {
 
   function sectionLabel(text) {
     checkPage(10);
+    doc.setFillColor(...currentTierColor);
+    doc.rect(margin, y - 4, contentW, 7, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
-    doc.setTextColor(180, 100, 100);
-    doc.text(text.toUpperCase(), margin, y);
-    doc.setDrawColor(200, 160, 160);
-    doc.setLineWidth(0.3);
-    doc.line(margin + doc.getTextWidth(text.toUpperCase()) + 3, y - 0.5, pageW - margin, y - 0.5);
-    y += 5;
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text(text.toUpperCase(), margin + 3, y + 0.5);
+    y += 7;
   }
 
   function lightBox(fillR, fillG, fillB, h) {
@@ -1422,11 +1426,11 @@ function downloadPDF(bookingDateStr, noteStr) {
     // Bio
     if (r.bio) {
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
+      doc.setFontSize(9.5);
       doc.setTextColor(50, 40, 40);
       const bioLines = doc.splitTextToSize(r.bio, leftW);
       doc.text(bioLines, margin, leftY);
-      leftY += bioLines.length * 4.5 + 5;
+      leftY += bioLines.length * 5 + 6;
     }
 
     // Tier blurb
@@ -1438,7 +1442,7 @@ function downloadPDF(bookingDateStr, noteStr) {
       doc.setFillColor(...tierColor);
       doc.rect(margin, leftY, 2, blurbH, 'F');
       doc.setFont('helvetica', 'italic');
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       doc.setTextColor(80, 50, 50);
       doc.text(blurbLines, margin + 5, leftY + 5);
       leftY += blurbH + 4;
@@ -1458,7 +1462,7 @@ function downloadPDF(bookingDateStr, noteStr) {
       doc.setFillColor(167, 139, 250);
       doc.rect(margin, leftY, 2, compH, 'F');
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       doc.setTextColor(60, 50, 80);
       doc.text(compLines, margin + 5, leftY + 5);
       leftY += compH + 4;
@@ -1480,11 +1484,11 @@ function downloadPDF(bookingDateStr, noteStr) {
     rightY += 4;
     criteria.forEach((cr) => {
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.5);
+      doc.setFontSize(9);
       doc.setTextColor(100, 90, 85);
       doc.text(cr.label, rightX + 3, rightY + 4);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       doc.setTextColor(50, 40, 40);
       doc.text(`${cr.val}/${cr.max}`, rightX + rightW - 3, rightY + 4, { align: 'right' });
       // Track
@@ -1590,61 +1594,26 @@ function downloadPDF(bookingDateStr, noteStr) {
         doc.setFillColor(i % 2 === 0 ? 250 : 246, i % 2 === 0 ? 248 : 245, i % 2 === 0 ? 244 : 241);
         doc.rect(margin, y, contentW, 6, 'F');
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(7.5);
+        doc.setFontSize(8.5);
         doc.setTextColor(120, 80, 80);
-        doc.text(label.toUpperCase(), margin + 3, y + 4.2);
+        doc.text(label.toUpperCase(), margin + 3, y + 4.5);
         doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
         doc.setTextColor(50, 40, 40);
         const valLines = doc.splitTextToSize(String(value), contentW - 55);
         if (valLines.length > 1) {
-          doc.rect(margin, y, contentW, valLines.length * 4.5 + 3, 'F');
-          doc.text(valLines, margin + 52, y + 4.2);
-          y += valLines.length * 4.5 + 3;
+          doc.rect(margin, y, contentW, valLines.length * 5 + 4, 'F');
+          doc.text(valLines, margin + 52, y + 4.5);
+          y += valLines.length * 5 + 4;
         } else {
-          doc.text(valLines[0], margin + 52, y + 4.2);
-          y += 6;
+          doc.text(valLines[0], margin + 52, y + 4.5);
+          y += 7;
         }
       });
       y += 4;
     }
 
-    // Data points — social, accolades
-    const dataItems = [];
-    if (dp.totalSocialFollowers > 0) dataItems.push(['Social (Combined)', dp.estimatedSocialFollowing]);
-    if (dp.instagram > 0) dataItems.push(['Instagram', dp.instagram >= 1000000 ? (dp.instagram/1000000).toFixed(1)+'M' : Math.round(dp.instagram/1000)+'K']);
-    if (dp.twitter > 0) dataItems.push(['X/Twitter', dp.twitter >= 1000000 ? (dp.twitter/1000000).toFixed(1)+'M' : Math.round(dp.twitter/1000)+'K']);
-    if (dp.tiktok > 0) dataItems.push(['TikTok', dp.tiktok >= 1000000 ? (dp.tiktok/1000000).toFixed(1)+'M' : Math.round(dp.tiktok/1000)+'K']);
-    if (dp.linkedin > 0) dataItems.push(['LinkedIn', dp.linkedin >= 1000000 ? (dp.linkedin/1000000).toFixed(1)+'M' : Math.round(dp.linkedin/1000)+'K']);
-    if (dp.facebook > 0) dataItems.push(['Facebook', dp.facebook >= 1000000 ? (dp.facebook/1000000).toFixed(1)+'M' : Math.round(dp.facebook/1000)+'K']);
-    if (dp.hasNationalBestseller) dataItems.push(['National Bestseller', 'Yes']);
-    if (dp.hasAwardWin) dataItems.push(['Award Win', 'Yes']);
-    if (dp.hasAwardNomination && !dp.hasAwardWin) dataItems.push(['Award Nomination', 'Yes']);
-    if (dp.hasForbesList) dataItems.push(['Forbes/Time List', 'Yes']);
-    if (dp.hasTED) dataItems.push(['TED Main Stage', 'Yes']);
-    if (dp.annualViews) {
-      dp.annualViews.slice(0,3).forEach(av => {
-        dataItems.push([`Wikipedia ${av.year}`, av.views >= 1000000 ? (av.views/1000000).toFixed(1)+'M views' : Math.round(av.views/1000)+'K views']);
-      });
-    }
-
-    if (dataItems.length > 0) {
-      checkPage(dataItems.length * 6 + 12);
-      sectionLabel('Data Points');
-      dataItems.forEach(([label, value], i) => {
-        checkPage(7);
-        doc.setFillColor(i % 2 === 0 ? 250 : 246, i % 2 === 0 ? 248 : 245, i % 2 === 0 ? 244 : 241);
-        doc.rect(margin, y, contentW, 6, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(7.5);
-        doc.setTextColor(120, 80, 80);
-        doc.text(label.toUpperCase(), margin + 3, y + 4.2);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
-        doc.setTextColor(50, 40, 40);
-        doc.text(String(value), margin + 52, y + 4.2);
-        y += 6;
-      });
-    }
+    // Data Points section removed from PDF — shown in tool only
 
     // Footer
     const pageCount = doc.getNumberOfPages();
