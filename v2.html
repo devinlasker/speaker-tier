@@ -1325,13 +1325,19 @@ function downloadPDF(bookingDateStr, noteStr) {
   const pullDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const pullTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
-  function newPage() {
-    doc.addPage();
-    y = 0;
+  function checkPage(needed) {
+    if (y + needed > 270) { doc.addPage(); y = 36; drawHeaderStrip(currentTierColor); }
   }
 
-  function checkPage(needed) {
-    if (y + needed > 270) { newPage(); }
+  let currentTierColor = [139, 58, 58];
+
+  function drawHeaderStrip(tierColor) {
+    doc.setFillColor(...tierColor);
+    doc.rect(0, 0, pageW, 8, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    doc.text('Speaker Commission Tier Tool — Confidential', pageW / 2, 5.5, { align: 'center' });
   }
 
   function drawPageHeader(speakerName, tier, commission, tierColor) {
@@ -1369,9 +1375,9 @@ function downloadPDF(bookingDateStr, noteStr) {
     checkPage(10);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(7.5);
-    doc.setTextColor(139, 58, 58);
+    doc.setTextColor(180, 100, 100);
     doc.text(text.toUpperCase(), margin, y);
-    doc.setDrawColor(139, 58, 58);
+    doc.setDrawColor(200, 160, 160);
     doc.setLineWidth(0.3);
     doc.line(margin + doc.getTextWidth(text.toUpperCase()) + 3, y - 0.5, pageW - margin, y - 0.5);
     y += 5;
@@ -1385,8 +1391,9 @@ function downloadPDF(bookingDateStr, noteStr) {
   const scored = results.filter(r => !r.error);
 
   scored.forEach((r, rIdx) => {
-    if (rIdx > 0) { newPage(); }
+    if (rIdx > 0) { doc.addPage(); y = 0; }
     const tierColor = tierColors[r.tier] || tierColors[3];
+    currentTierColor = tierColor;
     const dp = r.dataPoints || {};
     const sc = r.scorecard || {};
     const bd = getBookData(r.name);
@@ -1566,7 +1573,7 @@ function downloadPDF(bookingDateStr, noteStr) {
       ['Bestseller', sc.bestsellerDetails],
       ['Awards', sc.awardDetails],
       ['Notable Fact', sc.notableFact],
-    ].filter(([k, v]) => v && v.trim() !== '' && v !== 'N/A' && v !== 'None');
+    ].filter(([k, v]) => v && v.trim() !== '' && !['n/a', 'none', 'not applicable', 'na', 'n/a.', 'not applicable.'].includes(v.trim().toLowerCase()));
 
     if (scRows.length > 0) {
       checkPage(scRows.length * 6 + 12);
@@ -1577,7 +1584,7 @@ function downloadPDF(bookingDateStr, noteStr) {
         doc.rect(margin, y, contentW, 6, 'F');
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(7.5);
-        doc.setTextColor(139, 58, 58);
+        doc.setTextColor(120, 80, 80);
         doc.text(label.toUpperCase(), margin + 3, y + 4.2);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(50, 40, 40);
@@ -1622,7 +1629,7 @@ function downloadPDF(bookingDateStr, noteStr) {
         doc.rect(margin, y, contentW, 6, 'F');
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(7.5);
-        doc.setTextColor(139, 58, 58);
+        doc.setTextColor(120, 80, 80);
         doc.text(label.toUpperCase(), margin + 3, y + 4.2);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(7.5);
