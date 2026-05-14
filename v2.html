@@ -574,80 +574,6 @@
   .savings-saved { color: #4ade80; font-size: 16px; font-weight: 700; }
   .savings-highlight { padding: 6px 12px; background: rgba(74,222,128,0.08); border-radius: 6px; }
 
-  .pdf-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 200;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .pdf-modal-overlay.active { display: flex; }
-  .pdf-modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 440px;
-    width: 100%;
-  }
-  .pdf-modal h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    margin-bottom: 6px;
-    color: var(--text);
-  }
-  .pdf-modal .pdf-modal-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 24px;
-    line-height: 1.5;
-  }
-  .pdf-field-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
-    display: block;
-  }
-  .pdf-field-hint {
-    font-size: 11px;
-    color: var(--muted);
-    font-style: italic;
-    margin-left: 8px;
-  }
-  .pdf-input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 11px 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--text);
-    outline: none;
-    margin-bottom: 16px;
-    transition: border-color 0.2s;
-  }
-  .pdf-input:focus { border-color: var(--accent); }
-  .pdf-modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px; }
-  .anchored-badge {
-    display: inline-block;
-    background: rgba(240,192,64,0.15);
-    border: 1px solid rgba(240,192,64,0.4);
-    color: var(--tier0);
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-left: 8px;
-  }
 </style>
 </head>
 <body>
@@ -694,21 +620,6 @@
     <div class="empty-state">
       <div class="icon">◈</div>
       <p>Enter a speaker name above to generate<br>a live data-backed tier assessment.</p>
-    </div>
-  </div>
-</div>
-
-<div class="pdf-modal-overlay" id="pdfModal">
-  <div class="pdf-modal">
-    <h3>Generate PDF Report</h3>
-    <p class="pdf-modal-sub">Both fields are optional.</p>
-    <label class="pdf-field-label">Booking Date <span class="pdf-field-hint">If filled, date appears on the report</span></label>
-    <input type="date" class="pdf-input" id="pdfBookingDate" />
-    <label class="pdf-field-label">Note <span class="pdf-field-hint">e.g. "Q4 Miami keynote, signed 8/10"</span></label>
-    <input type="text" class="pdf-input" id="pdfNote" placeholder="Optional note..." />
-    <div class="pdf-modal-actions">
-      <button class="btn btn-secondary" onclick="closePdfModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="generateAndDownloadPDF()">Generate PDF</button>
     </div>
   </div>
 </div>
@@ -1326,23 +1237,6 @@ function renderCard(data) {
 
 // setComplexityByIdx removed in V2
 
-function openPdfModal() {
-  document.getElementById('pdfBookingDate').value = '';
-  document.getElementById('pdfNote').value = '';
-  document.getElementById('pdfModal').classList.add('active');
-}
-
-function closePdfModal() {
-  document.getElementById('pdfModal').classList.remove('active');
-}
-
-function generateAndDownloadPDF() {
-  const bookingDate = document.getElementById('pdfBookingDate').value;
-  const note = document.getElementById('pdfNote').value.trim();
-  closePdfModal();
-  downloadPDF(bookingDate, note);
-}
-
 function downloadPDF(bookingDateStr, noteStr) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -1350,11 +1244,9 @@ function downloadPDF(bookingDateStr, noteStr) {
   const margin = 14;
   const contentW = pageW - margin * 2;
   let y = 18;
-  const isAnchored = !!bookingDateStr;
   const pullDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  const bookingDateFormatted = bookingDateStr
-    ? new Date(bookingDateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-    : null;
+  const pullTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const isAnchored = false;
 
   const tierColors = {
     0: [240, 192, 64],
@@ -1375,25 +1267,12 @@ function downloadPDF(bookingDateStr, noteStr) {
 
   y += 6;
 
-  // Date line
+  // Date line — auto-stamped
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(107, 107, 133);
-  if (isAnchored) {
-    doc.text(`Booking Date: ${bookingDateFormatted}  ·  Generated: ${pullDate}`, margin, y);
-  } else {
-    doc.text(`Generated: ${pullDate}`, margin, y);
-  }
+  doc.text(`Generated: ${pullDate} at ${pullTime}`, margin, y);
   y += 5;
-
-  // Note line
-  if (noteStr) {
-    doc.setFont('helvetica', 'italic');
-    doc.setFontSize(8.5);
-    doc.setTextColor(107, 107, 133);
-    doc.text(`Note: ${noteStr}`, margin, y);
-    y += 5;
-  }
 
   y += 3;
   doc.setDrawColor(200, 200, 210);
@@ -1710,7 +1589,7 @@ function renderResults() {
     area.innerHTML = `<div class="empty-state"><div class="icon">◈</div><p>Enter a speaker name above to generate<br>a live data-backed tier assessment.</p></div>`;
     return;
   }
-  const header = `<div class="results-header"><div class="results-title">Results</div><div style="display:flex;gap:12px;align-items:center"><div class="results-count">${results.length} speaker${results.length !== 1 ? 's' : ''} scored</div><button class="btn btn-secondary" onclick="openPdfModal()" style="padding:8px 16px;font-size:11px;">↓ Download PDF</button></div></div>`;
+  const header = `<div class="results-header"><div class="results-title">Results</div><div style="display:flex;gap:12px;align-items:center"><div class="results-count">${results.length} speaker${results.length !== 1 ? 's' : ''} scored</div><button class="btn btn-secondary" onclick="downloadPDF('', '')" style="padding:8px 16px;font-size:11px;">↓ Download PDF</button></div></div>`;
   area.innerHTML = header + results.map(r => {
     if (r.error) return `<div class="error-card">Could not score <strong>${r.name}</strong>: ${r.error}</div>`;
     return renderCard(r);
@@ -1858,9 +1737,6 @@ document.getElementById('batchModal').addEventListener('click', e => {
   if (e.target === document.getElementById('batchModal')) closeBatch();
 });
 
-document.getElementById('pdfModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('pdfModal')) closePdfModal();
-});
 </script>
 </body>
 </html>
