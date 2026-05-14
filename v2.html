@@ -711,9 +711,10 @@ const HARDCODED_SPEAKER_DATA = {
 
 function getHardcodedData(name) {
   if (HARDCODED_SPEAKER_DATA[name]) return HARDCODED_SPEAKER_DATA[name];
-  const lower = name.toLowerCase();
+  const lower = name.toLowerCase().trim();
   for (const key of Object.keys(HARDCODED_SPEAKER_DATA)) {
     if (key.toLowerCase() === lower) return HARDCODED_SPEAKER_DATA[key];
+    if (lower.includes(key.toLowerCase()) || key.toLowerCase().includes(lower)) return HARDCODED_SPEAKER_DATA[key];
   }
   return null;
 }
@@ -1094,11 +1095,13 @@ Respond ONLY with valid JSON — no markdown, no extra text:
 
   // Override bio/blurb/format for hardcoded speakers
   const hardcoded = getHardcodedData(result.name);
+  console.log('Hardcoded lookup for:', result.name, '— found:', !!hardcoded);
   if (hardcoded) {
     result.bio = hardcoded.bio;
     result.tierBlurb = hardcoded.tierBlurb;
     result.tierComparison = hardcoded.tierComparison;
     result.appearanceFormat = hardcoded.appearanceFormat;
+    console.log('Hardcoded tierComparison injected:', result.tierComparison.slice(0, 50));
   }
 
   // Always override estimatedFee with our verified market rate data
