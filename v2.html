@@ -638,7 +638,7 @@
   <div class="modal">
     <h3>Batch Score Speakers</h3>
     <p>Enter one speaker name per line. Each speaker will be scored using live Wikipedia and web search data.</p>
-    <textarea id="batchInput" placeholder="Kevin Hart&#10;Malcolm Gladwell&#10;Brené Brown&#10;Simon Sinek"></textarea>
+    <textarea id="batchInput" placeholder="Mark Cuban&#10;Matthew McConaughey&#10;Brené Brown&#10;Hoda Kotb"></textarea>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeBatch()">Cancel</button>
       <button class="btn btn-primary" onclick="runBatch()">Run Batch</button>
@@ -1573,7 +1573,14 @@ function downloadPDF(bookingDateStr, noteStr) {
       ['Bestseller', sc.bestsellerDetails],
       ['Awards', sc.awardDetails],
       ['Notable Fact', sc.notableFact],
-    ].filter(([k, v]) => v && v.trim() !== '' && !['n/a', 'none', 'not applicable', 'na', 'n/a.', 'not applicable.'].includes(v.trim().toLowerCase()));
+    ].filter(([k, v]) => {
+      if (!v || v.trim() === '') return false;
+      const lower = v.trim().toLowerCase();
+      if (['n/a', 'none', 'not applicable', 'na', 'n/a.', 'not applicable.', 'not applicable', 'n/a (not applicable)'].includes(lower)) return false;
+      if (lower.startsWith('not applicable') || lower.startsWith('n/a')) return false;
+      if (lower === 'no' || lower === 'none known' || lower === 'none identified') return false;
+      return true;
+    });
 
     if (scRows.length > 0) {
       checkPage(scRows.length * 6 + 12);
@@ -1725,71 +1732,7 @@ async function runBatch() {
 }
 
 function openBatch() {
-  document.getElementById('batchInput').value = `Adam Grant
-Andrew Yang
-Andy Cohen
-Anita Hill
-Arnold Schwarzenegger
-Barbara Corcoran
-Bill Gates
-Bill Nye
-Bozoma Saint John
-Brene Brown
-Carla Hall
-Charlene Li
-Charles Duhigg
-Christina Wallace
-Daymond John
-Deion Sanders
-Dr. Bernice King
-Dr. Drew
-Dr. Oz
-Dr. Shefali
-Emily Balcetis
-Erica Dhawan
-Gabrielle Union
-His Holiness the Dalai Lama
-Hoda Kotb
-Jack Black
-Jamie Foxx
-Jim Kwik
-Jonah Berger
-Judge Frank Caprio
-Kate McKinnon
-Kelly Ripa
-Ketanji Brown Jackson
-Kevin Bacon
-Kevin Hart
-Lindsey Vonn
-Malcolm Gladwell
-Mark Cuban
-Matthew McConaughey
-Mehdi Hasan
-Neil Patrick Harris
-Oprah Winfrey
-President Barack Obama
-President Bill Clinton
-President George W. Bush
-Rachael Ray
-Robin Roberts
-Rohit Bhargava
-Ryan Serhant
-Scott Hamilton
-Sebastian Maniscalco
-Sheryl Sandberg
-Simon Sinek
-Sir Richard Branson
-Steve Madden
-Suze Orman
-Sylvester Stallone
-Tamron Hall
-Tanya Acker
-Terry Crews
-Thaddeus Bullard
-Tiki Barber
-Trevor Noah
-Valerie Jarrett
-Wendy Williams`;
+  document.getElementById('batchInput').value = '';
   document.getElementById('batchModal').classList.add('active');
 }
 
