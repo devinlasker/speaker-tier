@@ -537,6 +537,27 @@
 
   /* Booking Complexity removed in V2 */
 
+  .bio-block {
+    font-size: 13px; line-height: 1.7; color: var(--muted);
+    padding: 12px 0; border-top: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .tier-blurb {
+    font-size: 13px; line-height: 1.6; color: var(--text);
+    background: rgba(96,165,250,0.06); border-left: 3px solid var(--tier1);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin-bottom: 12px;
+    font-style: italic;
+  }
+  .format-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 0; margin-bottom: 8px;
+  }
+  .format-label {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+    width: 60px;
+  }
+  .format-val { font-size: 13px; color: var(--text); }
   .scorecard-section { margin: 12px 0; background: var(--surface2); border-radius: 8px; overflow: hidden; }
   .scorecard-row { display: flex; align-items: baseline; padding: 7px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); }
   .scorecard-row:last-child { border-bottom: none; }
@@ -679,9 +700,9 @@
 
 <div class="pdf-modal-overlay" id="pdfModal">
   <div class="pdf-modal">
-    <h3>Download PDF Report</h3>
-    <p class="pdf-modal-sub">Add context before generating. Both fields are optional.</p>
-    <label class="pdf-field-label">Booking Date <span class="pdf-field-hint">Fill in to anchor this as a commission record</span></label>
+    <h3>Generate PDF Report</h3>
+    <p class="pdf-modal-sub">Both fields are optional.</p>
+    <label class="pdf-field-label">Booking Date <span class="pdf-field-hint">If filled, date appears on the report</span></label>
     <input type="date" class="pdf-input" id="pdfBookingDate" />
     <label class="pdf-field-label">Note <span class="pdf-field-hint">e.g. "Q4 Miami keynote, signed 8/10"</span></label>
     <input type="text" class="pdf-input" id="pdfNote" placeholder="Optional note..." />
@@ -745,6 +766,33 @@ const BOOK_PURCHASE_DATA = {
   "Hoda Kotb":                { bookCost: 14394,      marketFee: 200000 },  // ~$200K
   "Sebastian Maniscalco":     { bookCost: 10000,      marketFee: 300000 }   // ~$300K
 };
+
+const HARDCODED_SPEAKER_DATA = {
+  "Hoda Kotb": {
+    bio: "Co-anchor of NBC's Today Show from 2018 to 2025, Hoda Kotb reached an average of 4 million daily viewers. Peabody Award and multiple Emmy winner. NYT bestselling author of 8 books with a combined 4.6M social following.",
+    tierBlurb: "Hoda Kotb is one of the most recognizable faces in American morning television — a two-decade network presence with a Peabody Award, eight bestselling books, and the kind of audience trust that money cannot manufacture.",
+    appearanceFormat: "Book-in-lieu engagement / Virtual keynote"
+  },
+  "Sebastian Maniscalco": {
+    bio: "The #1 ranked touring comedian in North America per Pollstar, Sebastian Maniscalco has recorded seven specials across Netflix, Hulu, and Showtime and holds multiple Madison Square Garden sellout records. Featured in Scorsese's The Irishman and the Oscar-winning Green Book. National bestselling memoir and 6.9M combined social following.",
+    tierBlurb: "Sebastian Maniscalco is the highest-grossing touring comedian in America — a Scorsese collaborator, multi-platform streaming headliner, and national bestselling author whose live ticket sales rival Kevin Hart's. The data makes the case.",
+    appearanceFormat: "Book-in-lieu engagement / Live keynote"
+  },
+  "Ryan Serhant": {
+    bio: "Star of Bravo's Million Dollar Listing NY (9+ seasons) and Netflix's Owning Manhattan. Founder of SERHANT. brokerage — $6B+ in annual sales across 700+ agents and 8 states. Three-time national bestselling author including WSJ-ranked Sell It Like Serhant. 5.1M combined social following.",
+    tierBlurb: "Ryan Serhant built one of the fastest-growing real estate brokerages in the country, has 5M+ social followers, and commands a national audience that spans two streaming platforms. His fee reflects his market floor — not his ceiling.",
+    appearanceFormat: "Book-in-lieu engagement / Virtual keynote"
+  }
+};
+
+function getHardcodedData(name) {
+  if (HARDCODED_SPEAKER_DATA[name]) return HARDCODED_SPEAKER_DATA[name];
+  const lower = name.toLowerCase();
+  for (const key of Object.keys(HARDCODED_SPEAKER_DATA)) {
+    if (key.toLowerCase() === lower) return HARDCODED_SPEAKER_DATA[key];
+  }
+  return null;
+}
 
 function getBookData(name) {
   if (BOOK_PURCHASE_DATA[name]) return BOOK_PURCHASE_DATA[name];
@@ -949,6 +997,10 @@ DO NOT SCORE. Set accolades to 0. Report these facts in dataPoints:
 APPEARANCE FEE RULE: Use the TOP of any reported range to determine score. Never default to 0 for a well-known figure with no fee data — infer from peers.
 PUBLIC PROFILE RULE: HIGH in Signal C alone = minimum score of 2. Missing Wikipedia/Trends data never justifies low score for globally recognized figures. National morning show co-host/anchor = minimum score of 2.
 
+For the bio field: write a punchy 2-3 sentence speaker bureau-style bio using specific facts from your research. Credentials, career highlights, reach.
+For the tierBlurb field: write the strongest possible 1-2 sentence case for why this speaker is nationally significant. Be direct and adversarial — argue the case. Use specific verifiable facts.
+For the appearanceFormat field: based on what you know about how NSLS engages speakers via book purchases, infer the likely format (Virtual keynote, Live keynote, Book-in-lieu engagement, etc.).
+
 Respond ONLY with valid JSON — no markdown, no extra text:
 {
   "name": "Full Name",
@@ -977,35 +1029,23 @@ Respond ONLY with valid JSON — no markdown, no extra text:
   "commission": "$X,XXX or No Commission",
   "bubbleReview": false,
   "bubbleNote": "",
+  "bio": "Punchy 2-3 sentence speaker bureau-style bio using specific verified facts.",
+  "tierBlurb": "1-2 sentence adversarial argument for why this speaker belongs at this tier. Direct, confident, fact-based.",
+  "appearanceFormat": "Virtual keynote / Live keynote / Book-in-lieu engagement / Panel appearance",
   "scorecard": {
-    "category": "",
-    "tvShow": "",
-    "network": "",
-    "film": "",
-    "comedy": "",
-    "sports": "",
-    "podcast": "",
-    "music": "",
-    "business": "",
-    "politics": "",
-    "bestsellerDetails": "",
-    "awardDetails": "",
-    "notableFact": ""
-  },
-  "scorecard": {
-    "category": "The speaker's primary category (TV Host, Comedian, Athlete, Author, Politician, Business, etc.)",
-    "tvShow": "Name of their most notable TV show(s) and network if applicable",
-    "network": "Network or streaming platform (ABC, NBC, Netflix, etc.) if applicable",
+    "category": "Primary category (TV Host, Comedian, Athlete, Author, Politician, Business, etc.)",
+    "tvShow": "Most notable TV show(s) and network if applicable",
+    "network": "Network or streaming platform if applicable",
     "film": "Notable films and box office if applicable",
     "comedy": "Netflix/HBO specials, touring details if applicable",
-    "sports": "Career stats, championships, Hall of Fame status if applicable",
+    "sports": "Career stats, championships, Hall of Fame if applicable",
     "podcast": "Podcast name, ranking, listeners if applicable",
     "music": "Chart performance, Grammy info, tour gross if applicable",
     "business": "Company, valuation, Forbes ranking if applicable",
     "politics": "Office held, notable rulings/legislation if applicable",
     "bestsellerDetails": "Specific bestseller lists and book titles if applicable",
     "awardDetails": "Specific awards won or nominated for if applicable",
-    "notableFact": "One most compelling fact about this speaker's reach or impact"
+    "notableFact": "The single most compelling fact about this speaker's reach or impact"
   },
   "reasoning": "2-3 sentences citing specific facts from your searches."
 }`;
@@ -1092,6 +1132,14 @@ Respond ONLY with valid JSON — no markdown, no extra text:
   else result.tier = 3;
   const commissions = ['$5,000','$5,000','$2,500','No Commission']; // V2: Tier 0 maps to Tier 1 commission
   result.commission = commissions[result.tier];
+
+  // Override bio/blurb/format for hardcoded speakers
+  const hardcoded = getHardcodedData(result.name);
+  if (hardcoded) {
+    result.bio = hardcoded.bio;
+    result.tierBlurb = hardcoded.tierBlurb;
+    result.appearanceFormat = hardcoded.appearanceFormat;
+  }
 
 
   return result;
@@ -1219,17 +1267,39 @@ function renderCard(data) {
         <div class="speaker-name">${data.name}</div>
         <div class="tier-pill ${tp}">Tier ${data.tier}</div>
       </div>
-      <div class="live-data-row">
-        ${data.liveWiki ? '<div class="live-chip"><div class="live-dot"></div> Wikipedia Live</div>' : ''}
-        ${data.liveTrends ? '<div class="live-chip"><div class="live-dot"></div> Google Trends Live</div>' : ''}
-        <div class="live-chip"><div class="live-dot"></div> Web Search Verified</div>
-      </div>
+
+      ${(() => {
+        const bd = getBookData(data.name);
+        if (!bd || bd.bookCost === 0) return '';
+        const savings = bd.marketFee - bd.bookCost;
+        const savingsPct = Math.round((savings / bd.marketFee) * 100);
+        const allIn = bd.bookCost + 5000;
+        const allInPct = Math.round((allIn / bd.marketFee) * 100);
+        const netValue = bd.marketFee - allIn;
+        const ratio = Math.round(bd.marketFee / 5000);
+        return `<div class="savings-row">
+          <div class="savings-title">📚 Book Purchase vs. Market Rate</div>
+          <div class="savings-grid">
+            <div class="savings-item"><div class="savings-label">Books Paid</div><div class="savings-val savings-cost">$${bd.bookCost.toLocaleString()}</div></div>
+            <div class="savings-item"><div class="savings-label">Market Rate</div><div class="savings-val">${formatMoney(bd.marketFee)}</div></div>
+            <div class="savings-item savings-highlight"><div class="savings-label">Estimated Savings</div><div class="savings-val savings-saved">$${savings.toLocaleString()} (${savingsPct}%)</div></div>
+          </div>
+          <div class="savings-grid" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(74,222,128,0.1)">
+            <div class="savings-item"><div class="savings-label">All-In Cost vs Market</div><div class="savings-val" style="color:#e8e8f0">${allInPct}% <span style="font-size:11px;color:#6b6b85">($${allIn.toLocaleString()} of ${formatMoney(bd.marketFee)})</span></div></div>
+            <div class="savings-item"><div class="savings-label">Net Value Delivered</div><div class="savings-val savings-saved">$${netValue.toLocaleString()}</div></div>
+            <div class="savings-item"><div class="savings-label">Value-to-Commission</div><div class="savings-val savings-saved">${ratio}×</div></div>
+          </div>
+        </div>`;
+      })()}
       <div class="scores-grid">${scoreRows}</div>
       <div class="total-score">
         <span class="total-label">Total Score</span>
         <span class="total-val" style="color:${totalColor}">${data.total} / 12</span>
         <span class="commission" style="color:${totalColor}">${data.commission}</span>
       </div>
+      ${data.bio ? `<div class="bio-block">${data.bio}</div>` : ''}
+      ${data.tierBlurb ? `<div class="tier-blurb">${data.tierBlurb}</div>` : ''}
+      ${data.appearanceFormat ? `<div class="format-row"><span class="format-label">Format</span><span class="format-val">${data.appearanceFormat}</span></div>` : ''}
       ${(() => {
         const sc = data.scorecard || {};
         const rows = [
@@ -1246,8 +1316,8 @@ function renderCard(data) {
           ['Bestseller', sc.bestsellerDetails],
           ['Awards', sc.awardDetails],
           ['Notable Fact', sc.notableFact],
-        ].filter(([k, v]) => v && v.trim() !== '' && v !== 'N/A' && v !== 'None');
-        if (!rows.length) return `<div class="reasoning">${data.reasoning}</div>`;
+        ].filter(([k, v]) => v && v.trim() !== '' && v !== 'N/A' && v !== 'None' && v !== 'n/a');
+        if (!rows.length) return '';
         return `<div class="scorecard-section">${rows.map(([k, v]) => `<div class="scorecard-row"><span class="scorecard-key">${k}</span><span class="scorecard-val">${v}</span></div>`).join('')}</div>`;
       })()}
       ${(() => {
@@ -1317,16 +1387,6 @@ function downloadPDF(bookingDateStr, noteStr) {
   doc.setTextColor(26, 26, 46);
   doc.text('Speaker Tier Results', margin, y);
 
-  // Anchored badge
-  if (isAnchored) {
-    doc.setFillColor(240, 192, 64);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(0, 0, 0);
-    const badgeX = pageW - margin - 30;
-    doc.roundedRect(badgeX, y - 5, 30, 6, 1, 1, 'F');
-    doc.text('ANCHORED', badgeX + 15, y - 0.5, { align: 'center' });
-  }
   y += 6;
 
   // Date line
@@ -1334,14 +1394,9 @@ function downloadPDF(bookingDateStr, noteStr) {
   doc.setFontSize(8.5);
   doc.setTextColor(107, 107, 133);
   if (isAnchored) {
-    doc.setTextColor(240, 192, 64);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Booking Date: ${bookingDateFormatted}`, margin, y);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(107, 107, 133);
-    doc.text(`  ·  Pulled: ${pullDate}`, margin + 52, y);
+    doc.text(`Booking Date: ${bookingDateFormatted}  ·  Generated: ${pullDate}`, margin, y);
   } else {
-    doc.text(`Exploratory Pull — Not Anchored  ·  Pulled: ${pullDate}`, margin, y);
+    doc.text(`Generated: ${pullDate}`, margin, y);
   }
   y += 5;
 
@@ -1395,7 +1450,46 @@ function downloadPDF(bookingDateStr, noteStr) {
     const totalStr = `Total: ${r.total}/12`;
     doc.text(totalStr, pageW - margin - 5, y + 14, { align: 'right' });
 
-    y += 20;
+    y += 22;
+
+    // Bio
+    if (r.bio) {
+      checkPage(14);
+      const bioLines = doc.splitTextToSize(r.bio, contentW - 8);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(150, 150, 170);
+      doc.text(bioLines, margin + 4, y);
+      y += bioLines.length * 4.5 + 4;
+    }
+
+    // Tier blurb
+    if (r.tierBlurb) {
+      checkPage(16);
+      doc.setFillColor(15, 25, 45);
+      const blurbLines = doc.splitTextToSize(r.tierBlurb, contentW - 16);
+      const blurbH = blurbLines.length * 4.5 + 8;
+      doc.rect(margin, y, contentW, blurbH, 'F');
+      doc.setFillColor(96, 165, 250);
+      doc.rect(margin, y, 2.5, blurbH, 'F');
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8.5);
+      doc.setTextColor(180, 210, 250);
+      doc.text(blurbLines, margin + 7, y + 5);
+      y += blurbH + 4;
+    }
+
+    // Format
+    if (r.appearanceFormat) {
+      checkPage(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(107, 107, 133);
+      doc.text('FORMAT', margin + 4, y);
+      doc.setTextColor(200, 200, 220);
+      doc.text(r.appearanceFormat, margin + 32, y);
+      y += 7;
+    }
 
     // Scores section
     checkPage(16);
@@ -1425,6 +1519,63 @@ function downloadPDF(bookingDateStr, noteStr) {
     });
 
     y += 16;
+
+    // Savings section
+    const bd2 = getBookData(r.name);
+    if (bd2 && bd2.bookCost > 0) {
+      const savings = bd2.marketFee - bd2.bookCost;
+      const savingsPct = Math.round((savings / bd2.marketFee) * 100);
+      checkPage(24);
+      doc.setFillColor(10, 40, 20);
+      doc.roundedRect(margin, y, contentW, 22, 2, 2, 'F');
+      doc.setDrawColor(74, 222, 128);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(margin, y, contentW, 22, 2, 2, 'S');
+      const allIn2 = bd2.bookCost + 5000;
+      const allInPct2 = Math.round((allIn2 / bd2.marketFee) * 100);
+      const netValue2 = bd2.marketFee - allIn2;
+      const ratio2 = Math.round(bd2.marketFee / 5000);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(74, 222, 128);
+      doc.text('BOOK PURCHASE VS. MARKET RATE', margin + 5, y + 5);
+      const scols = [
+        { label: 'Books Paid', val: '$' + bd2.bookCost.toLocaleString() },
+        { label: 'Market Rate', val: formatMoney(bd2.marketFee) },
+        { label: 'Estimated Savings', val: '$' + savings.toLocaleString() + ' (' + savingsPct + '%)' }
+      ];
+      const scw = contentW / 3;
+      scols.forEach((col, ci) => {
+        const cx = margin + ci * scw + 4;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(107, 107, 133);
+        doc.text(col.label.toUpperCase(), cx, y + 11);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(ci === 2 ? 10 : 9);
+        doc.setTextColor(ci === 2 ? 74 : ci === 0 ? 252 : 220, ci === 2 ? 222 : ci === 0 ? 165 : 220, ci === 2 ? 128 : ci === 0 ? 165 : 235);
+        doc.text(col.val, cx, y + 17);
+      });
+      y += 20;
+      // Second row — all-in, net value, ratio
+      const row2cols = [
+        { label: 'All-In Cost vs Market', val: allInPct2 + '% ($' + allIn2.toLocaleString() + ')' },
+        { label: 'Net Value Delivered', val: '$' + netValue2.toLocaleString() },
+        { label: 'Value-to-Commission', val: ratio2 + '×' }
+      ];
+      row2cols.forEach((col, ci) => {
+        const cx = margin + ci * scw + 4;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(107, 107, 133);
+        doc.text(col.label.toUpperCase(), cx, y + 4);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(74, 222, 128);
+        doc.text(col.val, cx, y + 10);
+      });
+      y += 14;
+    }
 
     // Scorecard section
     const sc = r.scorecard || {};
