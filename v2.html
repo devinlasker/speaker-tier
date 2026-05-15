@@ -1316,8 +1316,8 @@ function downloadPDF(bookingDateStr, noteStr) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = 210;
-  const M = 16; // margin
-  const CW = pageW - M * 2; // content width
+  const M = 14;
+  const CW = pageW - M * 2;
   let y = 0;
   let currentColor = [139, 58, 58];
 
@@ -1325,201 +1325,96 @@ function downloadPDF(bookingDateStr, noteStr) {
   const pullTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
   function checkPage(needed) {
-    if (y + needed > 276) {
-      doc.addPage();
-      y = 0;
-      // Thin continuation bar
+    if (y + needed > 278) {
+      doc.addPage(); y = 0;
       doc.setFillColor(...currentColor);
-      doc.rect(0, 0, pageW, 6, 'F');
-      y = 10;
+      doc.rect(0, 0, pageW, 5, 'F');
+      y = 8;
     }
   }
 
-  function para(text, fontSize, bold, italic, textColor, maxW, lineH) {
-    doc.setFont('helvetica', bold ? (italic ? 'bolditalic' : 'bold') : (italic ? 'italic' : 'normal'));
-    doc.setFontSize(fontSize);
-    doc.setTextColor(...textColor);
-    const lines = doc.splitTextToSize(text, maxW || CW);
-    checkPage(lines.length * (lineH || fontSize * 0.4) + 2);
-    doc.text(lines, M, y);
-    y += lines.length * (lineH || fontSize * 0.4) + 2;
-    return lines.length;
-  }
-
-  function row(label, value, shade) {
-    const valLines = doc.splitTextToSize(String(value), CW - 52);
-    const rowH = Math.max(7, valLines.length * 5 + 3);
-    checkPage(rowH);
-    doc.setFillColor(shade ? 248 : 253, shade ? 245 : 251, shade ? 242 : 249);
-    doc.rect(M, y, CW, rowH, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.setTextColor(255, 255, 255);
-    // label pill
-    doc.setFillColor(...currentColor);
-    doc.rect(M, y, 48, rowH, 'F');
-    doc.text(label.toUpperCase(), M + 2, y + rowH/2 + 1.5);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(40, 35, 35);
-    doc.text(valLines, M + 51, y + 5);
-    y += rowH + 1;
-  }
-
   function sectionBar(text) {
-    checkPage(10);
+    checkPage(8);
     doc.setFillColor(...currentColor);
-    doc.rect(M, y, CW, 8, 'F');
+    doc.rect(M, y, CW, 6.5, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
+    doc.setFontSize(7.5);
     doc.setTextColor(255, 255, 255);
-    doc.text(text.toUpperCase(), M + 3, y + 5.5);
-    y += 10;
+    doc.text(text.toUpperCase(), M + 3, y + 4.5);
+    y += 8;
   }
 
-  function statBox(label, value, color) {
-    return { label, value, color };
+  function profileRow(label, value, shade) {
+    const valLines = doc.splitTextToSize(String(value), CW - 46);
+    const rowH = Math.max(6, valLines.length * 4.2 + 2);
+    checkPage(rowH);
+    doc.setFillColor(shade ? 248 : 252, shade ? 245 : 250, shade ? 242 : 248);
+    doc.rect(M, y, CW, rowH, 'F');
+    doc.setFillColor(...currentColor);
+    doc.rect(M, y, 42, rowH, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    doc.text(label.toUpperCase(), M + 2, y + rowH/2 + 1.2);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(40, 35, 35);
+    doc.text(valLines, M + 44, y + 4.5);
+    y += rowH + 0.5;
   }
 
-  function drawStatRow(stats) {
-    const boxW = (CW - (stats.length - 1) * 2) / stats.length;
-    checkPage(18);
-    stats.forEach((s, i) => {
-      const bx = M + i * (boxW + 2);
-      doc.setFillColor(248, 252, 249);
-      doc.setDrawColor(74, 180, 100);
-      doc.setLineWidth(0.3);
-      doc.roundedRect(bx, y, boxW, 16, 1, 1, 'FD');
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(100, 100, 110);
-      doc.text(s.label.toUpperCase(), bx + boxW/2, y + 4.5, { align: 'center' });
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(s.value.length > 8 ? 9 : 11);
+  function statGrid(items) {
+    const cols = items.length;
+    const boxW = (CW - (cols-1)*2) / cols;
+    checkPage(14);
+    items.forEach((s, i) => {
+      const bx = M + i*(boxW+2);
+      doc.setFillColor(245, 250, 246);
+      doc.setDrawColor(74,180,100);
+      doc.setLineWidth(0.25);
+      doc.roundedRect(bx, y, boxW, 13, 1, 1, 'FD');
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(6);
+      doc.setTextColor(100,100,110);
+      doc.text(s.label.toUpperCase(), bx+boxW/2, y+4, {align:'center'});
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(s.val.length > 9 ? 7.5 : 9);
       doc.setTextColor(...s.color);
-      doc.text(s.value, bx + boxW/2, y + 12, { align: 'center' });
+      doc.text(s.val, bx+boxW/2, y+10.5, {align:'center'});
     });
-    y += 18;
+    y += 15;
   }
 
   const scored = results.filter(r => !r.error);
 
   scored.forEach((r, rIdx) => {
     if (rIdx > 0) { doc.addPage(); y = 0; }
-    const tierColors = { 0:[139,58,58], 1:[139,58,58], 2:[140,100,60], 3:[120,120,130] };
+    const tierColors = {0:[139,58,58],1:[139,58,58],2:[140,100,60],3:[120,120,130]};
     currentColor = tierColors[r.tier] || tierColors[3];
     const dp = r.dataPoints || {};
     const sc = r.scorecard || {};
     const bd = getBookData(r.name);
 
-    // HEADER BAND
+    // HEADER
     doc.setFillColor(...currentColor);
-    doc.rect(0, 0, pageW, 32, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.setTextColor(255, 255, 255);
-    doc.text(r.name, M, 14);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Tier ${r.tier}  ·  ${r.commission}`, M, 22);
-    doc.setFontSize(8.5);
-    doc.setTextColor(255, 220, 220);
-    doc.text(`Generated: ${pullDate} at ${pullTime}`, pageW - M, 22, { align: 'right' });
+    doc.rect(0, 0, pageW, 26, 'F');
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(17);
+    doc.setTextColor(255,255,255);
+    doc.text(r.name, M, 12);
+    doc.setFontSize(9);
+    doc.setFont('helvetica','normal');
+    doc.text(`Tier ${r.tier}  ·  ${r.commission}`, M, 19);
+    doc.setFontSize(7.5);
+    doc.setTextColor(255,220,220);
+    doc.text(`Generated: ${pullDate} at ${pullTime}`, pageW-M, 19, {align:'right'});
     if (sc.category) {
-      doc.setFontSize(9);
-      doc.setTextColor(255, 220, 220);
-      doc.text(sc.category, M, 28);
+      doc.setFontSize(8);
+      doc.text(sc.category, M, 24);
     }
-    y = 38;
+    y = 30;
 
-    // BIO
-    if (r.bio) {
-      doc.setFillColor(252, 249, 246);
-      const bioLines = doc.splitTextToSize(r.bio, CW);
-      doc.rect(M, y, CW, bioLines.length * 5 + 6, 'F');
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9.5);
-      doc.setTextColor(50, 40, 40);
-      doc.text(bioLines, M + 3, y + 5);
-      y += bioLines.length * 5 + 8;
-    }
-
-    // TIER BLURB
-    if (r.tierBlurb) {
-      const blurbLines = doc.splitTextToSize(r.tierBlurb, CW - 8);
-      const blurbH = blurbLines.length * 5 + 8;
-      checkPage(blurbH + 4);
-      doc.setFillColor(250, 244, 244);
-      doc.rect(M, y, CW, blurbH, 'F');
-      doc.setFillColor(...currentColor);
-      doc.rect(M, y, 3, blurbH, 'F');
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(9.5);
-      doc.setTextColor(80, 50, 50);
-      doc.text(blurbLines, M + 6, y + 5.5);
-      y += blurbH + 4;
-    }
-
-    // TIER COMPARISON
-    if (r.tierComparison) {
-      const compLines = doc.splitTextToSize(r.tierComparison, CW - 8);
-      const compH = compLines.length * 5 + 10;
-      checkPage(compH + 4);
-      doc.setFillColor(246, 244, 252);
-      doc.rect(M, y, CW, compH, 'F');
-      doc.setFillColor(130, 100, 200);
-      doc.rect(M, y, 3, compH, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.5);
-      doc.setTextColor(130, 100, 200);
-      doc.text('TIER COMPARISON', M + 6, y + 5);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(50, 40, 70);
-      doc.text(compLines, M + 6, y + 10);
-      y += compH + 4;
-    }
-
-    // SCORES
-    sectionBar('Scoring');
-    const criteria = [
-      { label: 'Public Profile', val: r.scores.publicProfile },
-      { label: 'Social Media', val: r.scores.socialMedia },
-      { label: 'Appearance Fee', val: r.scores.appearanceFee },
-      { label: 'Accolades', val: r.scores.accolades },
-    ];
-    criteria.forEach((cr, i) => {
-      checkPage(9);
-      doc.setFillColor(i % 2 === 0 ? 252 : 248, i % 2 === 0 ? 250 : 247, i % 2 === 0 ? 248 : 244);
-      doc.rect(M, y, CW, 8, 'F');
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(80, 70, 65);
-      doc.text(cr.label, M + 3, y + 5.5);
-      // Score bar
-      doc.setFillColor(220, 215, 210);
-      doc.rect(M + 60, y + 3, 80, 2.5, 'F');
-      const fc = cr.val === 3 ? [180,130,50] : cr.val === 2 ? [80,130,190] : [170,150,200];
-      doc.setFillColor(...fc);
-      doc.rect(M + 60, y + 3, (cr.val/3)*80, 2.5, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(...fc);
-      doc.text(`${cr.val}/3`, pageW - M - 3, y + 5.5, { align: 'right' });
-      y += 8;
-    });
-    // Total score
-    checkPage(10);
-    doc.setFillColor(...currentColor);
-    doc.rect(M, y, CW, 9, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(255, 255, 255);
-    doc.text('TOTAL SCORE', M + 3, y + 6.2);
-    doc.text(`${r.total}/12  ·  ${r.commission}`, pageW - M - 3, y + 6.2, { align: 'right' });
-    y += 11;
-
-    // SAVINGS
+    // 1. BOOK PURCHASE VS MARKET RATE — at top, right after header
     if (bd && bd.bookCost > 0) {
       const savings = bd.marketFee - bd.bookCost;
       const savingsPct = Math.round((savings / bd.marketFee) * 100);
@@ -1528,65 +1423,133 @@ function downloadPDF(bookingDateStr, noteStr) {
       const netValue = bd.marketFee - allIn;
       const ratio = Math.round(bd.marketFee / 5000);
       sectionBar('Book Purchase vs. Market Rate');
-      drawStatRow([
-        statBox('Books Paid', '$' + bd.bookCost.toLocaleString(), [200,80,80]),
-        statBox('Market Rate', formatMoney(bd.marketFee), [50,50,60]),
-        statBox('Est. Savings', '$' + savings.toLocaleString(), [40,140,80]),
-        statBox('Savings %', savingsPct + '%', [40,140,80]),
+      statGrid([
+        {label:'Books Paid', val:'$'+bd.bookCost.toLocaleString(), color:[200,80,80]},
+        {label:'Market Rate', val:formatMoney(bd.marketFee), color:[50,50,60]},
+        {label:'Est. Savings', val:'$'+savings.toLocaleString(), color:[40,140,80]},
+        {label:'Savings %', val:savingsPct+'%', color:[40,140,80]},
+        {label:'All-In vs Market', val:allInPct+'%', color:[40,140,80]},
+        {label:'Net Value', val:'$'+netValue.toLocaleString(), color:[40,140,80]},
+        {label:'Value/Commission', val:ratio+'×', color:[40,140,80]},
       ]);
-      drawStatRow([
-        statBox('All-In vs Market', allInPct + '%', [40,140,80]),
-        statBox('All-In Cost', '$' + allIn.toLocaleString(), [80,80,90]),
-        statBox('Net Value', '$' + netValue.toLocaleString(), [40,140,80]),
-        statBox('Value/Commission', ratio + '×', [40,140,80]),
-      ]);
-      y += 2;
     }
 
-    // SPEAKER PROFILE
-    const scFilter = (v) => {
-      if (!v || v.trim() === '') return false;
+    // 2. SCORING
+    sectionBar('Scoring');
+    const criteria = [
+      {label:'Public Profile', val:r.scores.publicProfile},
+      {label:'Social Media', val:r.scores.socialMedia},
+      {label:'Appearance Fee', val:r.scores.appearanceFee},
+      {label:'Accolades', val:r.scores.accolades},
+    ];
+    criteria.forEach((cr, i) => {
+      checkPage(7);
+      doc.setFillColor(i%2===0?252:248, i%2===0?250:247, i%2===0?248:244);
+      doc.rect(M, y, CW, 6.5, 'F');
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8);
+      doc.setTextColor(80,70,65);
+      doc.text(cr.label, M+3, y+4.5);
+      doc.setFillColor(215,210,205);
+      doc.rect(M+62, y+2.5, 80, 2, 'F');
+      const fc = cr.val===3?[180,130,50]:cr.val===2?[80,130,190]:[170,150,200];
+      doc.setFillColor(...fc);
+      doc.rect(M+62, y+2.5, (cr.val/3)*80, 2, 'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(8);
+      doc.setTextColor(...fc);
+      doc.text(`${cr.val}/3`, pageW-M-3, y+4.5, {align:'right'});
+      y += 6.5;
+    });
+    checkPage(8);
+    doc.setFillColor(...currentColor);
+    doc.rect(M, y, CW, 7.5, 'F');
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(9);
+    doc.setTextColor(255,255,255);
+    doc.text('TOTAL SCORE', M+3, y+5.2);
+    doc.text(`${r.total}/12  ·  ${r.commission}`, pageW-M-3, y+5.2, {align:'right'});
+    y += 9;
+
+    // 3. BIO
+    if (r.bio) {
+      checkPage(12);
+      const bioLines = doc.splitTextToSize(r.bio, CW-4);
+      doc.setFillColor(252,249,246);
+      doc.rect(M, y, CW, bioLines.length*4.5+5, 'F');
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(50,40,40);
+      doc.text(bioLines, M+3, y+4.5);
+      y += bioLines.length*4.5+7;
+    }
+
+    // 4. TIER BLURB
+    if (r.tierBlurb) {
+      const blurbLines = doc.splitTextToSize(r.tierBlurb, CW-8);
+      const blurbH = blurbLines.length*4.5+7;
+      checkPage(blurbH+3);
+      doc.setFillColor(250,244,244);
+      doc.rect(M, y, CW, blurbH, 'F');
+      doc.setFillColor(...currentColor);
+      doc.rect(M, y, 2.5, blurbH, 'F');
+      doc.setFont('helvetica','italic');
+      doc.setFontSize(8.5);
+      doc.setTextColor(80,50,50);
+      doc.text(blurbLines, M+5, y+5);
+      y += blurbH+4;
+    }
+
+    // 5. TIER COMPARISON
+    if (r.tierComparison) {
+      const compLines = doc.splitTextToSize(r.tierComparison, CW-8);
+      const compH = compLines.length*4.5+9;
+      checkPage(compH+3);
+      doc.setFillColor(246,244,252);
+      doc.rect(M, y, CW, compH, 'F');
+      doc.setFillColor(130,100,200);
+      doc.rect(M, y, 2.5, compH, 'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(130,100,200);
+      doc.text('TIER COMPARISON', M+5, y+4.5);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(50,40,70);
+      doc.text(compLines, M+5, y+9);
+      y += compH+4;
+    }
+
+    // 6. SPEAKER PROFILE
+    const scFilter = v => {
+      if (!v || v.trim()==='') return false;
       const l = v.trim().toLowerCase();
-      if (l.startsWith('not applicable') || l.startsWith('n/a') || l === 'none' || l === 'no' || l === 'na') return false;
+      if (l.startsWith('not applicable')||l.startsWith('n/a')||l==='none'||l==='no'||l==='na') return false;
       return true;
     };
     const scRows = [
-      ['TV / Show', sc.tvShow], ['Network', sc.network], ['Film', sc.film],
-      ['Comedy', sc.comedy], ['Sports', sc.sports], ['Podcast', sc.podcast],
-      ['Music', sc.music], ['Business', sc.business], ['Politics', sc.politics],
-      ['Bestseller', sc.bestsellerDetails], ['Awards', sc.awardDetails], ['Notable Fact', sc.notableFact],
-    ].filter(([k, v]) => scFilter(v));
+      ['TV / Show',sc.tvShow],['Network',sc.network],['Film',sc.film],
+      ['Comedy',sc.comedy],['Sports',sc.sports],['Podcast',sc.podcast],
+      ['Music',sc.music],['Business',sc.business],['Politics',sc.politics],
+      ['Bestseller',sc.bestsellerDetails],['Awards',sc.awardDetails],['Notable Fact',sc.notableFact],
+    ].filter(([k,v])=>scFilter(v));
 
-    if (scRows.length > 0) {
+    if (scRows.length>0) {
       sectionBar('Speaker Profile');
-      scRows.forEach(([label, value], i) => row(label, value, i % 2 === 0));
+      scRows.forEach(([label,value],i)=>profileRow(label,value,i%2===0));
     }
 
-    // APPEARANCE FORMAT
     if (r.appearanceFormat) {
-      checkPage(8);
-      doc.setFillColor(250, 248, 244);
-      doc.rect(M, y, CW, 7, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.setTextColor(255, 255, 255);
-      doc.setFillColor(...currentColor);
-      doc.rect(M, y, 48, 7, 'F');
-      doc.text('FORMAT', M + 2, y + 4.8);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(40, 35, 35);
-      doc.text(r.appearanceFormat, M + 51, y + 4.8);
-      y += 9;
+      checkPage(7);
+      profileRow('Format', r.appearanceFormat, scRows.length%2===0);
     }
 
     // FOOTER
-    const pg = doc.getNumberOfPages();
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(160, 140, 130);
-    doc.text('Speaker Commission Tier Tool — Confidential', pageW / 2, 290, { align: 'center' });
-    doc.text(`Page ${pg}`, pageW - M, 290, { align: 'right' });
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(160,140,130);
+    doc.text('Speaker Commission Tier Tool — Confidential', pageW/2, 291, {align:'center'});
+    doc.text(`Page ${doc.getNumberOfPages()}`, pageW-M, 291, {align:'right'});
   });
 
   doc.save(`speaker-tier-results-${new Date().toISOString().slice(0,10)}.pdf`);
