@@ -1316,207 +1316,210 @@ function downloadPDF(bookingDateStr, noteStr) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = 210;
-  const margin = 16;
-  const contentW = pageW - margin * 2;
+  const M = 16; // margin
+  const CW = pageW - M * 2; // content width
   let y = 0;
-
-  const tierColors = {
-    0: [139, 58, 58],
-    1: [139, 58, 58],
-    2: [140, 100, 60],
-    3: [120, 120, 130]
-  };
+  let currentColor = [139, 58, 58];
 
   const pullDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const pullTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
   function checkPage(needed) {
-    if (y + needed > 270) { doc.addPage(); y = 36; drawHeaderStrip(currentTierColor); }
+    if (y + needed > 276) {
+      doc.addPage();
+      y = 0;
+      // Thin continuation bar
+      doc.setFillColor(...currentColor);
+      doc.rect(0, 0, pageW, 6, 'F');
+      y = 10;
+    }
   }
 
-  let currentTierColor = [139, 58, 58];
-
-  function drawHeaderStrip(tierColor) {
-    doc.setFillColor(...tierColor);
-    doc.rect(0, 0, pageW, 8, 'F');
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.setTextColor(255, 255, 255);
-    doc.text('Speaker Commission Tier Tool — Confidential', pageW / 2, 5.5, { align: 'center' });
+  function para(text, fontSize, bold, italic, textColor, maxW, lineH) {
+    doc.setFont('helvetica', bold ? (italic ? 'bolditalic' : 'bold') : (italic ? 'italic' : 'normal'));
+    doc.setFontSize(fontSize);
+    doc.setTextColor(...textColor);
+    const lines = doc.splitTextToSize(text, maxW || CW);
+    checkPage(lines.length * (lineH || fontSize * 0.4) + 2);
+    doc.text(lines, M, y);
+    y += lines.length * (lineH || fontSize * 0.4) + 2;
+    return lines.length;
   }
 
-  function drawPageHeader(speakerName, tier, commission, tierColor) {
-    // Full-width header band
-    doc.setFillColor(...tierColor);
-    doc.rect(0, 0, pageW, 28, 'F');
-
-    // Speaker name
+  function row(label, value, shade) {
+    const valLines = doc.splitTextToSize(String(value), CW - 52);
+    const rowH = Math.max(7, valLines.length * 5 + 3);
+    checkPage(rowH);
+    doc.setFillColor(shade ? 248 : 253, shade ? 245 : 251, shade ? 242 : 249);
+    doc.rect(M, y, CW, rowH, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(18);
+    doc.setFontSize(8.5);
     doc.setTextColor(255, 255, 255);
-    doc.text(speakerName, margin, 13);
-
-    // Tier pill area
-    doc.setFillColor(255, 255, 255, 0.2);
+    // label pill
+    doc.setFillColor(...currentColor);
+    doc.rect(M, y, 48, rowH, 'F');
+    doc.text(label.toUpperCase(), M + 2, y + rowH/2 + 1.5);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.setTextColor(255, 255, 255);
-    doc.text(`Tier ${tier}  ·  ${commission}`, pageW - margin, 10, { align: 'right' });
-
-    // Generated date
-    doc.setFontSize(8);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'italic');
-    doc.text(`Generated: ${pullDate} at ${pullTime}`, pageW - margin, 16, { align: 'right' });
-
-    // Rubric version
-    doc.setFontSize(7.5);
-    doc.text('Rubric v2 · 12pt · No Tier 0', pageW - margin, 22, { align: 'right' });
-
-    y = 36;
+    doc.setTextColor(40, 35, 35);
+    doc.text(valLines, M + 51, y + 5);
+    y += rowH + 1;
   }
 
-  function sectionLabel(text) {
+  function sectionBar(text) {
     checkPage(10);
-    doc.setFillColor(...currentTierColor);
-    doc.rect(margin, y - 4, contentW, 7, 'F');
+    doc.setFillColor(...currentColor);
+    doc.rect(M, y, CW, 8, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
+    doc.setFontSize(9);
     doc.setTextColor(255, 255, 255);
-    doc.text(text.toUpperCase(), margin + 3, y + 0.5);
-    y += 7;
+    doc.text(text.toUpperCase(), M + 3, y + 5.5);
+    y += 10;
   }
 
-  function lightBox(fillR, fillG, fillB, h) {
-    doc.setFillColor(fillR, fillG, fillB);
-    doc.rect(margin, y, contentW, h, 'F');
+  function statBox(label, value, color) {
+    return { label, value, color };
+  }
+
+  function drawStatRow(stats) {
+    const boxW = (CW - (stats.length - 1) * 2) / stats.length;
+    checkPage(18);
+    stats.forEach((s, i) => {
+      const bx = M + i * (boxW + 2);
+      doc.setFillColor(248, 252, 249);
+      doc.setDrawColor(74, 180, 100);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(bx, y, boxW, 16, 1, 1, 'FD');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 110);
+      doc.text(s.label.toUpperCase(), bx + boxW/2, y + 4.5, { align: 'center' });
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(s.value.length > 8 ? 9 : 11);
+      doc.setTextColor(...s.color);
+      doc.text(s.value, bx + boxW/2, y + 12, { align: 'center' });
+    });
+    y += 18;
   }
 
   const scored = results.filter(r => !r.error);
 
   scored.forEach((r, rIdx) => {
     if (rIdx > 0) { doc.addPage(); y = 0; }
-    const tierColor = tierColors[r.tier] || tierColors[3];
-    currentTierColor = tierColor;
+    const tierColors = { 0:[139,58,58], 1:[139,58,58], 2:[140,100,60], 3:[120,120,130] };
+    currentColor = tierColors[r.tier] || tierColors[3];
     const dp = r.dataPoints || {};
     const sc = r.scorecard || {};
     const bd = getBookData(r.name);
 
-    // PAGE HEADER BAND
-    drawPageHeader(r.name, r.tier, r.commission, tierColor);
-
-    // Category subtitle
+    // HEADER BAND
+    doc.setFillColor(...currentColor);
+    doc.rect(0, 0, pageW, 32, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(255, 255, 255);
+    doc.text(r.name, M, 14);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Tier ${r.tier}  ·  ${r.commission}`, M, 22);
+    doc.setFontSize(8.5);
+    doc.setTextColor(255, 220, 220);
+    doc.text(`Generated: ${pullDate} at ${pullTime}`, pageW - M, 22, { align: 'right' });
     if (sc.category) {
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(10);
-      doc.setTextColor(100, 80, 80);
-      doc.text(sc.category, margin, y);
-      y += 7;
+      doc.setFontSize(9);
+      doc.setTextColor(255, 220, 220);
+      doc.text(sc.category, M, 28);
     }
+    y = 38;
 
-    // TWO COLUMN LAYOUT
-    const leftW = 105;
-    const rightW = contentW - leftW - 6;
-    const rightX = margin + leftW + 6;
-    const colStartY = y;
-
-    // LEFT COLUMN — bio, blurb, comparison
-    let leftY = y;
-
-    // Bio
+    // BIO
     if (r.bio) {
+      doc.setFillColor(252, 249, 246);
+      const bioLines = doc.splitTextToSize(r.bio, CW);
+      doc.rect(M, y, CW, bioLines.length * 5 + 6, 'F');
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9.5);
       doc.setTextColor(50, 40, 40);
-      const bioLines = doc.splitTextToSize(r.bio, leftW);
-      doc.text(bioLines, margin, leftY);
-      leftY += bioLines.length * 5 + 6;
+      doc.text(bioLines, M + 3, y + 5);
+      y += bioLines.length * 5 + 8;
     }
 
-    // Tier blurb
+    // TIER BLURB
     if (r.tierBlurb) {
-      doc.setFillColor(250, 245, 240);
-      const blurbLines = doc.splitTextToSize(r.tierBlurb, leftW - 8);
-      const blurbH = blurbLines.length * 4.2 + 8;
-      doc.rect(margin, leftY, leftW, blurbH, 'F');
-      doc.setFillColor(...tierColor);
-      doc.rect(margin, leftY, 2, blurbH, 'F');
+      const blurbLines = doc.splitTextToSize(r.tierBlurb, CW - 8);
+      const blurbH = blurbLines.length * 5 + 8;
+      checkPage(blurbH + 4);
+      doc.setFillColor(250, 244, 244);
+      doc.rect(M, y, CW, blurbH, 'F');
+      doc.setFillColor(...currentColor);
+      doc.rect(M, y, 3, blurbH, 'F');
       doc.setFont('helvetica', 'italic');
-      doc.setFontSize(9);
+      doc.setFontSize(9.5);
       doc.setTextColor(80, 50, 50);
-      doc.text(blurbLines, margin + 5, leftY + 5);
-      leftY += blurbH + 4;
+      doc.text(blurbLines, M + 6, y + 5.5);
+      y += blurbH + 4;
     }
 
-    // Tier comparison
+    // TIER COMPARISON
     if (r.tierComparison) {
+      const compLines = doc.splitTextToSize(r.tierComparison, CW - 8);
+      const compH = compLines.length * 5 + 10;
+      checkPage(compH + 4);
+      doc.setFillColor(246, 244, 252);
+      doc.rect(M, y, CW, compH, 'F');
+      doc.setFillColor(130, 100, 200);
+      doc.rect(M, y, 3, compH, 'F');
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
-      doc.setTextColor(139, 58, 58);
-      doc.text('TIER COMPARISON', margin, leftY);
-      leftY += 4;
-      doc.setFillColor(248, 243, 243);
-      const compLines = doc.splitTextToSize(r.tierComparison, leftW - 8);
-      const compH = compLines.length * 4.2 + 8;
-      doc.rect(margin, leftY, leftW, compH, 'F');
-      doc.setFillColor(167, 139, 250);
-      doc.rect(margin, leftY, 2, compH, 'F');
+      doc.setFontSize(7.5);
+      doc.setTextColor(130, 100, 200);
+      doc.text('TIER COMPARISON', M + 6, y + 5);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
-      doc.setTextColor(60, 50, 80);
-      doc.text(compLines, margin + 5, leftY + 5);
-      leftY += compH + 4;
+      doc.setTextColor(50, 40, 70);
+      doc.text(compLines, M + 6, y + 10);
+      y += compH + 4;
     }
 
-    // RIGHT COLUMN — scores + savings
-    let rightY = colStartY;
-
-    // Score grid
+    // SCORES
+    sectionBar('Scoring');
     const criteria = [
-      { label: 'Public Profile', val: r.scores.publicProfile, max: 3 },
-      { label: 'Social Media', val: r.scores.socialMedia, max: 3 },
-      { label: 'Appearance Fee', val: r.scores.appearanceFee, max: 3 },
-      { label: 'Accolades', val: r.scores.accolades, max: 3 },
+      { label: 'Public Profile', val: r.scores.publicProfile },
+      { label: 'Social Media', val: r.scores.socialMedia },
+      { label: 'Appearance Fee', val: r.scores.appearanceFee },
+      { label: 'Accolades', val: r.scores.accolades },
     ];
-
-    doc.setFillColor(250, 248, 244);
-    doc.rect(rightX, rightY, rightW, criteria.length * 10 + 6, 'F');
-    rightY += 4;
-    criteria.forEach((cr) => {
+    criteria.forEach((cr, i) => {
+      checkPage(9);
+      doc.setFillColor(i % 2 === 0 ? 252 : 248, i % 2 === 0 ? 250 : 247, i % 2 === 0 ? 248 : 244);
+      doc.rect(M, y, CW, 8, 'F');
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
-      doc.setTextColor(100, 90, 85);
-      doc.text(cr.label, rightX + 3, rightY + 4);
+      doc.setTextColor(80, 70, 65);
+      doc.text(cr.label, M + 3, y + 5.5);
+      // Score bar
+      doc.setFillColor(220, 215, 210);
+      doc.rect(M + 60, y + 3, 80, 2.5, 'F');
+      const fc = cr.val === 3 ? [180,130,50] : cr.val === 2 ? [80,130,190] : [170,150,200];
+      doc.setFillColor(...fc);
+      doc.rect(M + 60, y + 3, (cr.val/3)*80, 2.5, 'F');
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
-      doc.setTextColor(50, 40, 40);
-      doc.text(`${cr.val}/${cr.max}`, rightX + rightW - 3, rightY + 4, { align: 'right' });
-      // Track
-      doc.setFillColor(220, 210, 205);
-      doc.rect(rightX + 3, rightY + 5.5, rightW - 6, 1.5, 'F');
-      // Fill
-      const fillW = (cr.val / cr.max) * (rightW - 6);
-      if (fillW > 0) {
-        const fc = cr.val === 3 ? [180, 130, 50] : cr.val === 2 ? [100, 140, 200] : [170, 150, 200];
-        doc.setFillColor(...fc);
-        doc.rect(rightX + 3, rightY + 5.5, fillW, 1.5, 'F');
-      }
-      rightY += 10;
+      doc.setTextColor(...fc);
+      doc.text(`${cr.val}/3`, pageW - M - 3, y + 5.5, { align: 'right' });
+      y += 8;
     });
-    rightY += 3;
-
     // Total score
-    doc.setFillColor(...tierColor);
-    doc.rect(rightX, rightY, rightW, 10, 'F');
+    checkPage(10);
+    doc.setFillColor(...currentColor);
+    doc.rect(M, y, CW, 9, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(255, 255, 255);
-    doc.text('TOTAL SCORE', rightX + 3, rightY + 6.5);
     doc.setFontSize(10);
-    doc.text(`${r.total}/12`, rightX + rightW - 3, rightY + 6.5, { align: 'right' });
-    rightY += 13;
+    doc.setTextColor(255, 255, 255);
+    doc.text('TOTAL SCORE', M + 3, y + 6.2);
+    doc.text(`${r.total}/12  ·  ${r.commission}`, pageW - M - 3, y + 6.2, { align: 'right' });
+    y += 11;
 
-    // Savings block
+    // SAVINGS
     if (bd && bd.bookCost > 0) {
       const savings = bd.marketFee - bd.bookCost;
       const savingsPct = Math.round((savings / bd.marketFee) * 100);
@@ -1524,104 +1527,66 @@ function downloadPDF(bookingDateStr, noteStr) {
       const allInPct = Math.round((allIn / bd.marketFee) * 100);
       const netValue = bd.marketFee - allIn;
       const ratio = Math.round(bd.marketFee / 5000);
-
-      doc.setFillColor(240, 250, 243);
-      doc.rect(rightX, rightY, rightW, 52, 'F');
-      doc.setDrawColor(74, 180, 100);
-      doc.setLineWidth(0.3);
-      doc.rect(rightX, rightY, rightW, 52, 'S');
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
-      doc.setTextColor(40, 130, 70);
-      doc.text('BOOK PURCHASE VS. MARKET RATE', rightX + 3, rightY + 5);
-
-      const sRows = [
-        ['Books Paid', '$' + bd.bookCost.toLocaleString(), [200, 80, 80]],
-        ['Market Rate', formatMoney(bd.marketFee), [50, 50, 60]],
-        ['Est. Savings', '$' + savings.toLocaleString() + ' (' + savingsPct + '%)', [40, 130, 70]],
-        ['All-In vs Market', allInPct + '% ($' + allIn.toLocaleString() + ')', [40, 130, 70]],
-        ['Net Value', '$' + netValue.toLocaleString(), [40, 130, 70]],
-        ['Value-to-Commission', ratio + '×', [40, 130, 70]],
-      ];
-
-      let sY = rightY + 9;
-      sRows.forEach(([label, val, color]) => {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7);
-        doc.setTextColor(100, 100, 110);
-        doc.text(label.toUpperCase(), rightX + 3, sY);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8);
-        doc.setTextColor(...color);
-        doc.text(val, rightX + rightW - 3, sY, { align: 'right' });
-        sY += 7;
-      });
-      rightY += 55;
+      sectionBar('Book Purchase vs. Market Rate');
+      drawStatRow([
+        statBox('Books Paid', '$' + bd.bookCost.toLocaleString(), [200,80,80]),
+        statBox('Market Rate', formatMoney(bd.marketFee), [50,50,60]),
+        statBox('Est. Savings', '$' + savings.toLocaleString(), [40,140,80]),
+        statBox('Savings %', savingsPct + '%', [40,140,80]),
+      ]);
+      drawStatRow([
+        statBox('All-In vs Market', allInPct + '%', [40,140,80]),
+        statBox('All-In Cost', '$' + allIn.toLocaleString(), [80,80,90]),
+        statBox('Net Value', '$' + netValue.toLocaleString(), [40,140,80]),
+        statBox('Value/Commission', ratio + '×', [40,140,80]),
+      ]);
+      y += 2;
     }
 
-    // Move y to below both columns
-    y = Math.max(leftY, rightY) + 8;
-
-    // SCORECARD section — full width
-    const scRows = [
-      ['TV / Show', sc.tvShow],
-      ['Network', sc.network],
-      ['Film', sc.film],
-      ['Comedy', sc.comedy],
-      ['Sports', sc.sports],
-      ['Podcast', sc.podcast],
-      ['Music', sc.music],
-      ['Business', sc.business],
-      ['Politics', sc.politics],
-      ['Bestseller', sc.bestsellerDetails],
-      ['Awards', sc.awardDetails],
-      ['Notable Fact', sc.notableFact],
-    ].filter(([k, v]) => {
+    // SPEAKER PROFILE
+    const scFilter = (v) => {
       if (!v || v.trim() === '') return false;
-      const lower = v.trim().toLowerCase();
-      if (['n/a', 'none', 'not applicable', 'na', 'n/a.', 'not applicable.', 'not applicable', 'n/a (not applicable)'].includes(lower)) return false;
-      if (lower.startsWith('not applicable') || lower.startsWith('n/a')) return false;
-      if (lower === 'no' || lower === 'none known' || lower === 'none identified') return false;
+      const l = v.trim().toLowerCase();
+      if (l.startsWith('not applicable') || l.startsWith('n/a') || l === 'none' || l === 'no' || l === 'na') return false;
       return true;
-    });
+    };
+    const scRows = [
+      ['TV / Show', sc.tvShow], ['Network', sc.network], ['Film', sc.film],
+      ['Comedy', sc.comedy], ['Sports', sc.sports], ['Podcast', sc.podcast],
+      ['Music', sc.music], ['Business', sc.business], ['Politics', sc.politics],
+      ['Bestseller', sc.bestsellerDetails], ['Awards', sc.awardDetails], ['Notable Fact', sc.notableFact],
+    ].filter(([k, v]) => scFilter(v));
 
     if (scRows.length > 0) {
-      checkPage(scRows.length * 6 + 12);
-      sectionLabel('Speaker Profile');
-      scRows.forEach(([label, value], i) => {
-        checkPage(7);
-        doc.setFillColor(i % 2 === 0 ? 250 : 246, i % 2 === 0 ? 248 : 245, i % 2 === 0 ? 244 : 241);
-        doc.rect(margin, y, contentW, 6, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(120, 80, 80);
-        doc.text(label.toUpperCase(), margin + 3, y + 4.5);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8.5);
-        doc.setTextColor(50, 40, 40);
-        const valLines = doc.splitTextToSize(String(value), contentW - 55);
-        if (valLines.length > 1) {
-          doc.rect(margin, y, contentW, valLines.length * 5 + 4, 'F');
-          doc.text(valLines, margin + 52, y + 4.5);
-          y += valLines.length * 5 + 4;
-        } else {
-          doc.text(valLines[0], margin + 52, y + 4.5);
-          y += 7;
-        }
-      });
-      y += 4;
+      sectionBar('Speaker Profile');
+      scRows.forEach(([label, value], i) => row(label, value, i % 2 === 0));
     }
 
-    // Data Points section removed from PDF — shown in tool only
+    // APPEARANCE FORMAT
+    if (r.appearanceFormat) {
+      checkPage(8);
+      doc.setFillColor(250, 248, 244);
+      doc.rect(M, y, CW, 7, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(255, 255, 255);
+      doc.setFillColor(...currentColor);
+      doc.rect(M, y, 48, 7, 'F');
+      doc.text('FORMAT', M + 2, y + 4.8);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(40, 35, 35);
+      doc.text(r.appearanceFormat, M + 51, y + 4.8);
+      y += 9;
+    }
 
-    // Footer
-    const pageCount = doc.getNumberOfPages();
+    // FOOTER
+    const pg = doc.getNumberOfPages();
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
+    doc.setFontSize(8);
     doc.setTextColor(160, 140, 130);
-    doc.text('Speaker Commission Tier Tool — Confidential', pageW / 2, 288, { align: 'center' });
-    doc.text(`Page ${pageCount}`, pageW - margin, 288, { align: 'right' });
+    doc.text('Speaker Commission Tier Tool — Confidential', pageW / 2, 290, { align: 'center' });
+    doc.text(`Page ${pg}`, pageW - M, 290, { align: 'right' });
   });
 
   doc.save(`speaker-tier-results-${new Date().toISOString().slice(0,10)}.pdf`);
